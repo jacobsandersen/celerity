@@ -20,8 +20,7 @@ class TagListBuilder : public std::enable_shared_from_this<TagListBuilder<T>> {
 
   static std::shared_ptr<TagListBuilder> create() { return create(""); }
 
-  static std::shared_ptr<TagListBuilder> create(
-      const icu::UnicodeString& name) {
+  static std::shared_ptr<TagListBuilder> create(const icu::UnicodeString& name) {
     return std::make_shared<TagListBuilder>(name);
   }
 

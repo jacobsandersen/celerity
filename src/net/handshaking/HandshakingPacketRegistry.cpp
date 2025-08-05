@@ -7,7 +7,8 @@
 #include "IntentionPacket.h"
 
 namespace celerity::net::handshaking {
-template <typename T> requires ServerboundPacket<T>
+template <typename T>
+  requires ServerboundPacket<T>
 void register_serverbound(PacketRegistry& registry) {
   registry.register_serverbound<T>(ConnectionState::kHandshaking);
 }
@@ -15,4 +16,4 @@ void register_serverbound(PacketRegistry& registry) {
 void HandshakingPacketRegistry::register_all(PacketRegistry& registry) {
   register_serverbound<IntentionPacket>(registry);
 }
-}  // namespace celerity::net
+}  // namespace celerity::net::handshaking

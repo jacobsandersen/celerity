@@ -13,11 +13,7 @@
 #include "src/net/Packet.h"
 
 namespace celerity::net::handshaking {
-enum class ClientIntention {
-  Status = 1,
-  Login = 2,
-  Transfer = 3
-};
+enum class ClientIntention { Status = 1, Login = 2, Transfer = 3 };
 
 struct IntentionPacket final : Packet {
   const int32_t protocol_version_;

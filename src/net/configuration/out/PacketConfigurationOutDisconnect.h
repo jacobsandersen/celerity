@@ -8,8 +8,7 @@
 namespace celerity::net::configuration {
 class PacketConfigurationOutDisconnect : public OutboundPacket {
  public:
-  explicit PacketConfigurationOutDisconnect(std::string reason)
-      : OutboundPacket(0x02), m_reason(std::move(reason)) {}
+  explicit PacketConfigurationOutDisconnect(std::string reason) : OutboundPacket(0x02), m_reason(std::move(reason)) {}
 
   void write_data(ByteBuffer&) override;
 

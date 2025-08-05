@@ -23,8 +23,7 @@ class RSAKeypair {
 
   [[nodiscard]] std::vector<uint8_t> get_der_encoded_public_key() const;
 
-  [[nodiscard]] std::vector<uint8_t> decrypt(
-      const std::vector<uint8_t> &encrypted) const;
+  [[nodiscard]] std::vector<uint8_t> decrypt(const std::vector<uint8_t> &encrypted) const;
 
  private:
   CryptoPP::RSA::PrivateKey m_private_key;

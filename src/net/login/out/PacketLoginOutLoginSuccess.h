@@ -13,9 +13,8 @@
 namespace celerity::net::login {
 class PacketLoginOutLoginSuccess : public OutboundPacket {
  public:
-  PacketLoginOutLoginSuccess(
-      uuids::uuid unique_id, std::string username,
-      std::vector<player::MojangProfileProperty> properties)
+  PacketLoginOutLoginSuccess(uuids::uuid unique_id, std::string username,
+                             std::vector<player::MojangProfileProperty> properties)
       : OutboundPacket(0x02),
         m_unique_id(unique_id),
         m_username(std::move(username)),

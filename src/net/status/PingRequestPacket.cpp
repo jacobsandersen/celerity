@@ -9,6 +9,6 @@
 
 namespace celerity::net::status {
 void PingRequestPacket::handle(const PingRequestPacket& packet, Connection& connection) {
-  connection.send_packet(PongResponsePacket { packet.timestamp_ });
+  connection.send_packet(PongResponsePacket{packet.timestamp_});
 }
 }  // namespace celerity::net::status

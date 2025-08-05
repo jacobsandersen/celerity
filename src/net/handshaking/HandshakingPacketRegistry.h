@@ -13,10 +13,8 @@ struct HandshakingPacketRegistry {
 };
 
 inline struct HandshakingRegistration {
-  HandshakingRegistration() {
-    PacketRegistry::add_init_function(HandshakingPacketRegistry::register_all);
-  }
+  HandshakingRegistration() { PacketRegistry::add_init_function(HandshakingPacketRegistry::register_all); }
 } _handshaking_registration;
-}  // namespace celerity::net
+}  // namespace celerity::net::handshaking
 
-#endif //HANDSHAKINGPACKETREGISTRY_H
+#endif  // HANDSHAKINGPACKETREGISTRY_H

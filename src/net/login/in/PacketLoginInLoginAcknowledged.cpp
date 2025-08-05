@@ -7,9 +7,8 @@
 #include "../../configuration/out/PacketConfigurationOutKnownPacks.h"
 
 namespace celerity::net::login {
-void PacketLoginInLoginAcknowledged::handle(
-    const std::shared_ptr<Connection>& conn,
-    const std::unique_ptr<ByteBuffer>& buffer) {
+void PacketLoginInLoginAcknowledged::handle(const std::shared_ptr<Connection>& conn,
+                                            const std::unique_ptr<ByteBuffer>& buffer) {
   LOG(INFO) << "Client acknowledges login, switching to configuration state";
 
   conn->set_state(ConnectionState::Configuration);
@@ -19,13 +18,11 @@ void PacketLoginInLoginAcknowledged::handle(
   keep_alive.send(conn);
 
   LOG(INFO) << "Sending feature flags...";
-  configuration::PacketConfigurationOutFeatureFlags feature_flags(
-      {"minecraft:vanilla"});
+  configuration::PacketConfigurationOutFeatureFlags feature_flags({"minecraft:vanilla"});
   feature_flags.send(conn);
 
   LOG(INFO) << "Sending server's known packs...";
-  configuration::PacketConfigurationOutKnownPacks known_packs(
-      {{"minecraft", "core", "1.21.5"}});
+  configuration::PacketConfigurationOutKnownPacks known_packs({{"minecraft", "core", "1.21.5"}});
   known_packs.send(conn);
 }
 }  // namespace celerity::net::login

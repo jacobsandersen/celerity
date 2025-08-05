@@ -8,8 +8,7 @@
 namespace celerity::net {
 
 void NetworkManager::start() {
-  const uint32_t thread_count =
-      std::max(2u, std::thread::hardware_concurrency());
+  const uint32_t thread_count = std::max(2u, std::thread::hardware_concurrency());
 
   for (int i = 0; i < thread_count; ++i) {
     network_threads_.emplace_back([this] {
@@ -23,8 +22,7 @@ void NetworkManager::start() {
   }
 
   accept_connection();
-  LOG(INFO) << "Celerity is listening for connections on "
-            << acceptor_.local_endpoint();
+  LOG(INFO) << "Celerity is listening for connections on " << acceptor_.local_endpoint();
 }
 
 void NetworkManager::shutdown() {
@@ -41,19 +39,16 @@ void NetworkManager::shutdown() {
 }
 
 void NetworkManager::accept_connection() {
-  acceptor_.async_accept([this](const boost::system::error_code& err,
-                                tcp::socket sock) {
+  acceptor_.async_accept([this](const boost::system::error_code& err, tcp::socket sock) {
     if (err) {
       LOG(WARNING) << "Failed to accept a new connection: " << err.message();
     } else {
-      LOG(INFO) << "Connection established from "
-                << sock.remote_endpoint().address().to_string();
+      LOG(INFO) << "Connection established from " << sock.remote_endpoint().address().to_string();
 
-      const auto conn = std::make_shared<Connection>(
-          std::move(sock), [this](const Connection* c) {
-            if (c == nullptr) return;
-            MinecraftServer::get_server()->remove_player(c->get_unique_id());
-          });
+      const auto conn = std::make_shared<Connection>(std::move(sock), [this](const Connection* c) {
+        if (c == nullptr) return;
+        MinecraftServer::get_server()->remove_player(c->get_unique_id());
+      });
 
       conn->start();
     }

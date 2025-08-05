@@ -12,10 +12,8 @@ struct StatusPacketRegistry {
 };
 
 inline struct StatusRegistrations {
-  StatusRegistrations() {
-    PacketRegistry::add_init_function(StatusPacketRegistry::register_all);
-  }
+  StatusRegistrations() { PacketRegistry::add_init_function(StatusPacketRegistry::register_all); }
 } _status_registration;
 }  // namespace celerity::net::status
 
-#endif //STATUSPACKETREGISTRY_H
+#endif  // STATUSPACKETREGISTRY_H

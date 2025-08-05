@@ -15,18 +15,14 @@
 
 namespace celerity {
 template <typename T>
-typename std::enable_if<
-    std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type
+typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type
 ByteBuffer::write_buffer(std::deque<uint8_t>& buffer, T value) {
-  buffer.insert(buffer.end(), reinterpret_cast<uint8_t*>(&value),
-                reinterpret_cast<uint8_t*>(&value) + sizeof(T));
+  buffer.insert(buffer.end(), reinterpret_cast<uint8_t*>(&value), reinterpret_cast<uint8_t*>(&value) + sizeof(T));
 }
 
 template <typename T>
-typename std::enable_if<
-    std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type
-ByteBuffer::write_buffer(std::deque<uint8_t>& buffer, T value,
-                         uint32_t offset) {
+typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type
+ByteBuffer::write_buffer(std::deque<uint8_t>& buffer, T value, uint32_t offset) {
   size_t size = sizeof(T);
   offset = offset * size;
 
@@ -38,10 +34,8 @@ ByteBuffer::write_buffer(std::deque<uint8_t>& buffer, T value,
 }
 
 template <typename T>
-typename std::enable_if<
-    std::is_integral<T>::value || std::is_floating_point<T>::value,
-    T>::type static read_or_peek_buffer(std::deque<uint8_t>& buffer,
-                                        uint32_t offset, bool erase) {
+typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value,
+                        T>::type static read_or_peek_buffer(std::deque<uint8_t>& buffer, uint32_t offset, bool erase) {
   size_t size = sizeof(T);
   offset = offset * size;
 
@@ -52,37 +46,31 @@ typename std::enable_if<
   T value;
   std::memcpy(&value, &buffer[offset], size);
 
-  if (erase)
-    buffer.erase(buffer.begin() + offset,
-                 buffer.begin() + offset + static_cast<std::ptrdiff_t>(size));
+  if (erase) buffer.erase(buffer.begin() + offset, buffer.begin() + offset + static_cast<std::ptrdiff_t>(size));
 
   return value;
 }
 
 template <typename T>
-typename std::enable_if<
-    std::is_integral<T>::value || std::is_floating_point<T>::value, T>::type
+typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, T>::type
 ByteBuffer::read_buffer(std::deque<uint8_t>& buffer, uint32_t offset) {
   return read_or_peek_buffer<T>(buffer, offset, true);
 }
 
 template <typename T>
-typename std::enable_if<
-    std::is_integral<T>::value || std::is_floating_point<T>::value, T>::type
+typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, T>::type
 ByteBuffer::read_buffer(std::deque<uint8_t>& buffer) {
   return read_buffer<T>(buffer, 0);
 }
 
 template <typename T>
-typename std::enable_if<
-    std::is_integral<T>::value || std::is_floating_point<T>::value, T>::type
+typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, T>::type
 ByteBuffer::peek_buffer(std::deque<uint8_t>& buffer, uint32_t offset) {
   return read_or_peek_buffer<T>(buffer, offset, false);
 }
 
 template <typename T>
-typename std::enable_if<
-    std::is_integral<T>::value || std::is_floating_point<T>::value, T>::type
+typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, T>::type
 ByteBuffer::peek_buffer(std::deque<uint8_t>& buffer) {
   return peek_buffer<T>(buffer, 0);
 }
@@ -97,9 +85,7 @@ int8_t ByteBuffer::read_byte() { return read_buffer<int8_t>(m_data); }
 
 int8_t ByteBuffer::peek_byte() { return peek_byte(0); }
 
-int8_t ByteBuffer::peek_byte(uint32_t offset) {
-  return peek_buffer<int8_t>(m_data, offset);
-}
+int8_t ByteBuffer::peek_byte(uint32_t offset) { return peek_buffer<int8_t>(m_data, offset); }
 
 void ByteBuffer::write_bytes(const std::vector<int8_t>& bytes) {
   for (int8_t byte : bytes) {
@@ -133,17 +119,13 @@ std::vector<int8_t> ByteBuffer::peek_bytes(const size_t num_bytes) {
 
 void ByteBuffer::write_ubyte(uint8_t value) { write_buffer(m_data, value); }
 
-void ByteBuffer::write_ubyte(uint8_t value, uint32_t offset) {
-  write_buffer(m_data, value, offset);
-}
+void ByteBuffer::write_ubyte(uint8_t value, uint32_t offset) { write_buffer(m_data, value, offset); }
 
 uint8_t ByteBuffer::read_ubyte() { return read_buffer<uint8_t>(m_data); }
 
 uint8_t ByteBuffer::peek_ubyte() { return peek_ubyte(0); }
 
-uint8_t ByteBuffer::peek_ubyte(uint32_t offset) {
-  return peek_buffer<uint8_t>(m_data, offset);
-}
+uint8_t ByteBuffer::peek_ubyte(uint32_t offset) { return peek_buffer<uint8_t>(m_data, offset); }
 
 void ByteBuffer::write_ubytes(const std::vector<uint8_t>& ubytes) {
   for (uint8_t ubyte : ubytes) {
@@ -181,73 +163,49 @@ void ByteBuffer::write_short(int16_t value) { write_buffer(m_data, value); }
 
 int16_t ByteBuffer::read_short() { return read_buffer<int16_t>(m_data); }
 
-void ByteBuffer::write_be_short(int16_t value) {
-  write_short(boost::endian::native_to_big(value));
-}
+void ByteBuffer::write_be_short(int16_t value) { write_short(boost::endian::native_to_big(value)); }
 
-int16_t ByteBuffer::read_be_short() {
-  return boost::endian::big_to_native(read_short());
-}
+int16_t ByteBuffer::read_be_short() { return boost::endian::big_to_native(read_short()); }
 
 void ByteBuffer::write_ushort(uint16_t value) { write_buffer(m_data, value); }
 
 uint16_t ByteBuffer::read_ushort() { return read_buffer<uint16_t>(m_data); }
 
-void ByteBuffer::write_be_ushort(uint16_t value) {
-  write_ushort(boost::endian::native_to_big(value));
-}
+void ByteBuffer::write_be_ushort(uint16_t value) { write_ushort(boost::endian::native_to_big(value)); }
 
-uint16_t ByteBuffer::read_be_ushort() {
-  return boost::endian::big_to_native(read_short());
-}
+uint16_t ByteBuffer::read_be_ushort() { return boost::endian::big_to_native(read_short()); }
 
 void ByteBuffer::write_int(int32_t value) { write_buffer(m_data, value); }
 
 int32_t ByteBuffer::read_int() { return read_buffer<int32_t>(m_data); }
 
-void ByteBuffer::write_be_int(int32_t value) {
-  write_int(boost::endian::native_to_big(value));
-}
+void ByteBuffer::write_be_int(int32_t value) { write_int(boost::endian::native_to_big(value)); }
 
-int32_t ByteBuffer::read_be_int() {
-  return boost::endian::big_to_native(read_int());
-}
+int32_t ByteBuffer::read_be_int() { return boost::endian::big_to_native(read_int()); }
 
 void ByteBuffer::write_uint(uint32_t value) { write_buffer(m_data, value); }
 
 uint32_t ByteBuffer::read_uint() { return read_buffer<uint32_t>(m_data); }
 
-void ByteBuffer::write_be_uint(uint32_t value) {
-  write_uint(boost::endian::native_to_big(value));
-}
+void ByteBuffer::write_be_uint(uint32_t value) { write_uint(boost::endian::native_to_big(value)); }
 
-uint32_t ByteBuffer::read_be_uint() {
-  return boost::endian::big_to_native(read_int());
-}
+uint32_t ByteBuffer::read_be_uint() { return boost::endian::big_to_native(read_int()); }
 
 void ByteBuffer::write_long(int64_t value) { write_buffer(m_data, value); }
 
 int64_t ByteBuffer::read_long() { return read_buffer<int64_t>(m_data); }
 
-void ByteBuffer::write_be_long(int64_t value) {
-  write_long(boost::endian::native_to_big(value));
-}
+void ByteBuffer::write_be_long(int64_t value) { write_long(boost::endian::native_to_big(value)); }
 
-int64_t ByteBuffer::read_be_long() {
-  return boost::endian::big_to_native(read_long());
-}
+int64_t ByteBuffer::read_be_long() { return boost::endian::big_to_native(read_long()); }
 
 void ByteBuffer::write_ulong(uint64_t value) { write_buffer(m_data, value); }
 
 uint64_t ByteBuffer::read_ulong() { return read_buffer<uint64_t>(m_data); }
 
-void ByteBuffer::write_be_ulong(uint64_t value) {
-  write_ulong(boost::endian::native_to_big(value));
-}
+void ByteBuffer::write_be_ulong(uint64_t value) { write_ulong(boost::endian::native_to_big(value)); }
 
-uint64_t ByteBuffer::read_be_ulong() {
-  return boost::endian::big_to_native(read_long());
-}
+uint64_t ByteBuffer::read_be_ulong() { return boost::endian::big_to_native(read_long()); }
 
 void ByteBuffer::write_float(float value) { write_buffer(m_data, value); }
 
@@ -336,22 +294,19 @@ icu::UnicodeString ByteBuffer::read_string_modified_utf8() {
     bytes.pop();
 
     if ((first_byte >> 4) == 0b1111 || (first_byte >> 6) == 0b10) {
-      throw std::invalid_argument(
-          "First byte in modified UTF-8 group did not match expected pattern.");
+      throw std::invalid_argument("First byte in modified UTF-8 group did not match expected pattern.");
     }
 
     if ((first_byte >> 4) == 0b1110) {
       if (bytes.empty()) {
-        throw std::invalid_argument(
-            "Expected 2nd byte in 3-byte modified UTF-8 group, found only 1.");
+        throw std::invalid_argument("Expected 2nd byte in 3-byte modified UTF-8 group, found only 1.");
       }
 
       int8_t second_byte = bytes.front();
       bytes.pop();
 
       if (bytes.empty()) {
-        throw std::invalid_argument(
-            "Expected 3rd byte in 3-byte modified UTF-8 group, found only 2.");
+        throw std::invalid_argument("Expected 3rd byte in 3-byte modified UTF-8 group, found only 2.");
       }
 
       int8_t third_byte = bytes.front();
@@ -363,12 +318,10 @@ icu::UnicodeString ByteBuffer::read_string_modified_utf8() {
             "expected pattern.");
       }
 
-      str.append(((first_byte & 0x0F) << 12) | ((second_byte & 0x3F) << 6) |
-                 (third_byte & 0x3F));
+      str.append(((first_byte & 0x0F) << 12) | ((second_byte & 0x3F) << 6) | (third_byte & 0x3F));
     } else if ((first_byte >> 5) == 0b110) {
       if (bytes.empty()) {
-        throw std::invalid_argument(
-            "Expected 2nd byte in 2-byte modified UTF-8 group, found only 1.");
+        throw std::invalid_argument("Expected 2nd byte in 2-byte modified UTF-8 group, found only 1.");
       }
 
       int8_t second_byte = bytes.front();
@@ -402,9 +355,7 @@ void ByteBuffer::write_varint(int32_t value) {
 
 int32_t ByteBuffer::read_varint() { return read_varint(nullptr); }
 
-int32_t ByteBuffer::read_varint(uint8_t* bytes_read) {
-  return VarInt::decode_varint(this, bytes_read);
-}
+int32_t ByteBuffer::read_varint(uint8_t* bytes_read) { return VarInt::decode_varint(this, bytes_read); }
 
 std::optional<std::pair<int32_t, uint8_t>> ByteBuffer::peek_varint() {
   try {
@@ -417,8 +368,7 @@ std::optional<std::pair<int32_t, uint8_t>> ByteBuffer::peek_varint() {
   }
 }
 
-std::optional<std::vector<std::pair<int32_t, uint8_t>>>
-ByteBuffer::peek_varints(const size_t num_varints) {
+std::optional<std::vector<std::pair<int32_t, uint8_t>>> ByteBuffer::peek_varints(const size_t num_varints) {
   try {
     std::vector<std::pair<int32_t, uint8_t>> varints(num_varints);
     ByteBuffer tmp(peek_ubytes(5 * num_varints));
@@ -443,9 +393,7 @@ void ByteBuffer::write_varlong(int64_t value) {
   }
 }
 
-int64_t ByteBuffer::read_varlong() {
-  return VarInt::decode_varlong(this, nullptr);
-}
+int64_t ByteBuffer::read_varlong() { return VarInt::decode_varlong(this, nullptr); }
 
 uuids::uuid ByteBuffer::read_uuid() {
   uint64_t most_significant = read_ulong();
@@ -465,19 +413,13 @@ void ByteBuffer::write_uuid(uuids::uuid unique_id) {
   write_ulong(least_significant);
 }
 
-void ByteBuffer::append(const ByteBuffer& buffer) {
-  m_data.append_range(buffer.get_bytes());
-}
+void ByteBuffer::append(const ByteBuffer& buffer) { m_data.append_range(buffer.get_bytes()); }
 
 std::deque<uint8_t> ByteBuffer::get_data() const { return m_data; }
 
-std::vector<uint8_t> ByteBuffer::get_bytes() const {
-  return {m_data.begin(), m_data.end()};
-}
+std::vector<uint8_t> ByteBuffer::get_bytes() const { return {m_data.begin(), m_data.end()}; }
 
-void ByteBuffer::set_data(std::deque<uint8_t> data) {
-  m_data = std::move(data);
-}
+void ByteBuffer::set_data(std::deque<uint8_t> data) { m_data = std::move(data); }
 
 void ByteBuffer::set_bytes(std::vector<uint8_t> bytes) {
   m_data.clear();
@@ -486,9 +428,7 @@ void ByteBuffer::set_bytes(std::vector<uint8_t> bytes) {
 
 uint32_t ByteBuffer::get_data_length() const { return m_data.size(); }
 
-nbt::tag::TagType ByteBuffer::read_nbt_tag_type() {
-  return nbt::tag::TagType::type_id_to_type(read_ubyte());
-}
+nbt::tag::TagType ByteBuffer::read_nbt_tag_type() { return nbt::tag::TagType::type_id_to_type(read_ubyte()); }
 
 void ByteBuffer::reset() { m_data.clear(); }
 
@@ -500,7 +440,5 @@ std::string ByteBuffer::to_hex_string() const {
   }
   return oss.str();
 }
-void ByteBuffer::truncate_front(const size_t num_bytes) {
-  m_data.erase(m_data.begin(), m_data.begin() + num_bytes);
-}
+void ByteBuffer::truncate_front(const size_t num_bytes) { m_data.erase(m_data.begin(), m_data.begin() + num_bytes); }
 }  // namespace celerity

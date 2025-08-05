@@ -3,9 +3,8 @@
 #include <glog/logging.h>
 
 namespace celerity::net::configuration {
-void PacketConfigurationInPluginMessage::handle(
-    const std::shared_ptr<Connection>& conn,
-    const std::unique_ptr<ByteBuffer>& buffer) {
+void PacketConfigurationInPluginMessage::handle(const std::shared_ptr<Connection>& conn,
+                                                const std::unique_ptr<ByteBuffer>& buffer) {
   LOG(INFO) << "Received configuration plugin message...";
 
   const std::string channel = buffer->read_string();

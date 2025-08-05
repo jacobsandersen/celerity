@@ -45,8 +45,7 @@ T* downcast(std::unique_ptr<tag::Tag>& base_tag) {
   return downcasted;
 }
 
-void NBTWriter::write_payload(
-    std::unique_ptr<tag::Tag>& tag) {  // NOLINT(*-no-recursion)
+void NBTWriter::write_payload(std::unique_ptr<tag::Tag>& tag) {  // NOLINT(*-no-recursion)
   switch (tag->get_type().get_type_id()) {
     // End
     case 0: {
@@ -94,8 +93,7 @@ void NBTWriter::write_payload(
     }
     // String
     case 8: {
-      buffer_.write_string_modified_utf8(
-          downcast<tag::TagString>(tag)->get_string());
+      buffer_.write_string_modified_utf8(downcast<tag::TagString>(tag)->get_string());
       break;
     }
     // List
@@ -111,8 +109,7 @@ void NBTWriter::write_payload(
     }
     // Compound
     case 10: {
-      for (auto& tags = downcast<tag::TagCompound>(tag)->get_tags();
-           auto& named_tag : tags) {
+      for (auto& tags = downcast<tag::TagCompound>(tag)->get_tags(); auto& named_tag : tags) {
         write_tag(named_tag);
       }
       buffer_.write_ubyte(0);  // Tag End

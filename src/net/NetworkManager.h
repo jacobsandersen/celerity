@@ -18,9 +18,7 @@ class NetworkManager {
  public:
   explicit NetworkManager(const ServerConfig& config)
       : acceptor_(boost::asio::ip::tcp::acceptor(
-            context_,
-            boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(),
-                                           config.get_server_port()))) {}
+            context_, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), config.get_server_port()))) {}
 
   void start();
   void shutdown();

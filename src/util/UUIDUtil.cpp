@@ -4,8 +4,7 @@
 
 namespace celerity::util {
 bool UUIDUtil::valid_undashed_uuid(std::string uuid) {
-  return uuid.size() == 32 &&
-         std::ranges::all_of(uuid, [](char c) { return std::isxdigit(c); });
+  return uuid.size() == 32 && std::ranges::all_of(uuid, [](char c) { return std::isxdigit(c); });
 }
 
 std::string UUIDUtil::canonicalize_uuid(const std::string &uuid_no_dashes) {

@@ -17,8 +17,7 @@ class NamedTag {
   std::unique_ptr<Tag> tag_;
 
  public:
-  NamedTag(icu::UnicodeString name, std::unique_ptr<Tag> tag)
-      : name_(std::move(name)), tag_(std::move(tag)) {}
+  NamedTag(icu::UnicodeString name, std::unique_ptr<Tag> tag) : name_(std::move(name)), tag_(std::move(tag)) {}
 
   [[nodiscard]] icu::UnicodeString get_name() { return name_; }
   [[nodiscard]] std::unique_ptr<Tag>& get_tag() { return tag_; }

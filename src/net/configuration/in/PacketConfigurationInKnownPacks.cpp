@@ -9,9 +9,8 @@
 #include "../../../KnownPack.h"
 
 namespace celerity::net::configuration {
-void PacketConfigurationInKnownPacks::handle(
-    const std::shared_ptr<Connection>& conn,
-    const std::unique_ptr<ByteBuffer>& buffer) {
+void PacketConfigurationInKnownPacks::handle(const std::shared_ptr<Connection>& conn,
+                                             const std::unique_ptr<ByteBuffer>& buffer) {
   LOG(INFO) << "Received server known packs...";
 
   std::vector<KnownPack> known_packs;
@@ -27,8 +26,7 @@ void PacketConfigurationInKnownPacks::handle(
     const auto version = buffer->read_string();
     known_packs.emplace_back(ns, id, version);
 
-    LOG(INFO) << "Client knows about pack " << ns << ":" << id
-              << " with version " << version;
+    LOG(INFO) << "Client knows about pack " << ns << ":" << id << " with version " << version;
   }
 
   conn->set_known_packs(std::move(known_packs));

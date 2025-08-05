@@ -12,18 +12,12 @@ uint16_t ServerConfig::get_server_port() const {
 }
 
 uint16_t ServerConfig::get_compression_threshold() const {
-  return toml::find_or_default<uint16_t>(toml_, "compression_threshold",
-                                         kDefaultCompressionThreshold);
+  return toml::find_or_default<uint16_t>(toml_, "compression_threshold", kDefaultCompressionThreshold);
 }
-uint16_t ServerConfig::get_max_players() const {
-  return toml::find_or_default<uint16_t>(toml_, "max_players", 64);
-}
+uint16_t ServerConfig::get_max_players() const { return toml::find_or_default<uint16_t>(toml_, "max_players", 64); }
 
 std::string ServerConfig::get_motd() const {
-  return toml::find_or_default<std::string>(toml_, "motd",
-                                            "A C++ Minecraft Server");
+  return toml::find_or_default<std::string>(toml_, "motd", "A C++ Minecraft Server");
 }
 
-std::string ServerConfig::get_favicon() const {
-  return toml::find_or_default<std::string>(toml_, "favicon", "");
-}
+std::string ServerConfig::get_favicon() const { return toml::find_or_default<std::string>(toml_, "favicon", ""); }

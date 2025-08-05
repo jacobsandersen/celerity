@@ -8,8 +8,7 @@
 namespace celerity {
 class ConfigManager {
  public:
-  explicit ConfigManager(const std::filesystem::path& server_root)
-      : server_config_(server_root) {}
+  explicit ConfigManager(const std::filesystem::path& server_root) : server_config_(server_root) {}
 
   [[nodiscard]] const ServerConfig& get_server_config() const;
 

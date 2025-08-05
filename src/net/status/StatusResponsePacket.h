@@ -41,4 +41,4 @@ struct StatusResponsePacket final : Packet {
 };
 }  // namespace celerity::net::status
 
-#endif //STATUSRESPONSEPACKET_H
+#endif  // STATUSRESPONSEPACKET_H

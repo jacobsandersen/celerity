@@ -6,8 +6,7 @@
 namespace celerity::net::configuration {
 class PacketConfigurationInKeepAlive : public Packet {
  public:
-  void handle(const std::shared_ptr<Connection>& conn,
-              const std::unique_ptr<ByteBuffer>& buffer) override;
+  void handle(const std::shared_ptr<Connection>& conn, const std::unique_ptr<ByteBuffer>& buffer) override;
 };
 }  // namespace celerity::net::configuration
 

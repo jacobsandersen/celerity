@@ -32,8 +32,7 @@ class MinecraftServer {
 
   std::shared_ptr<player::Player> get_player(const std::string& username);
 
-  std::shared_ptr<player::Player> get_player(
-      const std::shared_ptr<uuids::uuid>& unique_id);
+  std::shared_ptr<player::Player> get_player(const std::shared_ptr<uuids::uuid>& unique_id);
 
   void remove_player(const std::shared_ptr<uuids::uuid>& unique_id);
 

@@ -12,8 +12,7 @@
 namespace celerity::player {
 class Player {
  public:
-  Player(std::shared_ptr<net::Connection> conn, std::string username,
-         std::shared_ptr<uuids::uuid> unique_id)
+  Player(std::shared_ptr<net::Connection> conn, std::string username, std::shared_ptr<uuids::uuid> unique_id)
       : m_connection(std::move(conn)),
         m_username(std::move(username)),
         m_unique_id(std::move(unique_id)),
@@ -25,13 +24,11 @@ class Player {
 
   [[nodiscard]] std::shared_ptr<uuids::uuid> get_unique_id() const;
 
-  [[nodiscard]] const std::shared_ptr<MojangProfile>& get_mojang_profile()
-      const;
+  [[nodiscard]] const std::shared_ptr<MojangProfile>& get_mojang_profile() const;
 
   void set_mojang_profile(const std::shared_ptr<MojangProfile>& mojang_profile);
 
-  [[nodiscard]] const std::shared_ptr<ClientInformation>&
-  get_client_information() const;
+  [[nodiscard]] const std::shared_ptr<ClientInformation>& get_client_information() const;
 
  private:
   std::shared_ptr<net::Connection> m_connection;

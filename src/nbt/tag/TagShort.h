@@ -10,8 +10,7 @@
 namespace celerity::nbt::tag {
 class TagShort final : public Tag {
  public:
-  explicit TagShort(const int16_t value)
-      : Tag(TagType::Short), m_value(value) {};
+  explicit TagShort(const int16_t value) : Tag(TagType::Short), m_value(value) {};
   [[nodiscard]] int16_t get_short() const { return m_value; }
 
  private:

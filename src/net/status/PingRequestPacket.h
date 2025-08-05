@@ -16,4 +16,4 @@ struct PingRequestPacket final : Packet {
 };
 }  // namespace celerity::net::status
 
-#endif //PINGREQUESTPACKET_H
+#endif  // PINGREQUESTPACKET_H

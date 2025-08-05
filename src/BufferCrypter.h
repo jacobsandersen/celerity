@@ -15,13 +15,10 @@ namespace celerity {
 class BufferCrypter {
  public:
   explicit BufferCrypter(const std::vector<uint8_t>& shared_secret) {
-    m_shared_secret =
-        CryptoPP::SecByteBlock(shared_secret.data(), shared_secret.size());
+    m_shared_secret = CryptoPP::SecByteBlock(shared_secret.data(), shared_secret.size());
     m_aes = new CryptoPP::AES::Encryption(m_shared_secret, SHARED_SECRET_SIZE);
-    m_enc_cipher = CryptoPP::CFB_Mode_ExternalCipher::Encryption(
-        *m_aes, m_shared_secret, 1);
-    m_dec_cipher = CryptoPP::CFB_Mode_ExternalCipher::Decryption(
-        *m_aes, m_shared_secret, 1);
+    m_enc_cipher = CryptoPP::CFB_Mode_ExternalCipher::Encryption(*m_aes, m_shared_secret, 1);
+    m_dec_cipher = CryptoPP::CFB_Mode_ExternalCipher::Decryption(*m_aes, m_shared_secret, 1);
   }
 
   ~BufferCrypter() { delete m_aes; }

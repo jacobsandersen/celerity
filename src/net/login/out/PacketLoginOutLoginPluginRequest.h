@@ -11,12 +11,8 @@
 namespace celerity::net::login {
 class PacketLoginOutLoginPluginRequest : public OutboundPacket {
  public:
-  PacketLoginOutLoginPluginRequest(int32_t message_id, bool successful,
-                                   std::vector<uint8_t> bytes)
-      : OutboundPacket(0x04),
-        m_message_id(message_id),
-        m_successful(successful),
-        m_bytes(std::move(bytes)) {}
+  PacketLoginOutLoginPluginRequest(int32_t message_id, bool successful, std::vector<uint8_t> bytes)
+      : OutboundPacket(0x04), m_message_id(message_id), m_successful(successful), m_bytes(std::move(bytes)) {}
 
   void write_data(ByteBuffer &buffer) override;
 

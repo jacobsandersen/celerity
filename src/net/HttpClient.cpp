@@ -6,15 +6,13 @@
 #include <sstream>
 
 namespace celerity::net {
-static size_t write_body(void* contents, size_t size, size_t nmemb,
-                         std::string* s) {
+static size_t write_body(void* contents, size_t size, size_t nmemb, std::string* s) {
   s->append(static_cast<char*>(contents), size * nmemb);
   return size * nmemb;
 }
 
-bool HttpClient::get_url(const string_view& url,
-                         const map<string, string>& query_params,
-                         std::string* resp_body, int64_t* resp_code) {
+bool HttpClient::get_url(const string_view& url, const map<string, string>& query_params, std::string* resp_body,
+                         int64_t* resp_code) {
   CURL* curl = curl_easy_init();
   if (!curl) {
     return false;

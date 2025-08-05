@@ -23,4 +23,4 @@ void IntentionPacket::handle(const IntentionPacket& packet, Connection& connecti
       break;
   }
 }
-}
+}  // namespace celerity::net::handshaking

@@ -10,8 +10,7 @@
 namespace celerity {
 class KnownPack final {
  public:
-  KnownPack(const std::string& ns, const std::string& id,
-            const std::string& version)
+  KnownPack(const std::string& ns, const std::string& id, const std::string& version)
       : m_namespace(ns), m_id(id), m_version(version) {}
 
   [[nodiscard]] std::string get_namespace() const;

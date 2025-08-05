@@ -11,8 +11,7 @@
 namespace celerity::net::login {
 class PacketLoginOutDisconnect : public OutboundPacket {
  public:
-  explicit PacketLoginOutDisconnect(std::string reason)
-      : OutboundPacket(0x00), m_reason(std::move(reason)) {}
+  explicit PacketLoginOutDisconnect(std::string reason) : OutboundPacket(0x00), m_reason(std::move(reason)) {}
 
   void write_data(ByteBuffer &buffer) override;
 

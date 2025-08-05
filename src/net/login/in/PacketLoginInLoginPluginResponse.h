@@ -8,8 +8,7 @@
 namespace celerity::net::login {
 class PacketLoginInLoginPluginResponse : public Packet {
  public:
-  void handle(const std::shared_ptr<Connection>&,
-              const std::unique_ptr<ByteBuffer>&) override;
+  void handle(const std::shared_ptr<Connection>&, const std::unique_ptr<ByteBuffer>&) override;
 };
 }  // namespace celerity::net::login
 

@@ -118,7 +118,8 @@ void Connection::send_packet(T packet) {
   }
 
   ByteBuffer wrapperBuffer;
-  wrapperBuffer.write_varint(static_cast<int32_t>(VarInt::encoding_length(data_length) + payloadBuffer.get_data_length()));
+  wrapperBuffer.write_varint(
+      static_cast<int32_t>(VarInt::encoding_length(data_length) + payloadBuffer.get_data_length()));
   wrapperBuffer.write_varint(data_length);
   wrapperBuffer.write_ubytes(payloadBuffer.get_bytes());
 
@@ -146,9 +147,7 @@ std::optional<boost::any> Connection::get_context_value(const std::string& key) 
   const auto search = m_context_map.find(key);
   return search == m_context_map.end() ? std::nullopt : search->second;
 }
-bool Connection::has_context_value(const std::string& key) const {
-  return get_context_value(key) != std::nullopt;
-}
+bool Connection::has_context_value(const std::string& key) const { return get_context_value(key) != std::nullopt; }
 
 void Connection::set_state(const ConnectionState state) { state_ = state; }
 

@@ -14,6 +14,6 @@ struct PairHash {
     return std::hash<T1>{}(p.first) ^ std::hash<T2>{}(p.second) << 1;
   }
 };
-}
+}  // namespace celerity::util
 
-#endif //CELERITY_UTIL_PAIRHASH_H
+#endif  // CELERITY_UTIL_PAIRHASH_H

@@ -13,13 +13,11 @@
 #include "../out/PacketLoginOutSetCompression.h"
 
 namespace celerity::net::login {
-constexpr std::string_view SESSION_URL =
-    "https://sessionserver.mojang.com/session/minecraft/hasJoined";
+constexpr std::string_view SESSION_URL = "https://sessionserver.mojang.com/session/minecraft/hasJoined";
 
 void performTwosCompliment(ByteBuffer& buffer) {
   bool carry = true;
-  for (int32_t i = static_cast<int32_t>(buffer.get_data_length()) - 1; i >= 0;
-       --i) {
+  for (int32_t i = static_cast<int32_t>(buffer.get_data_length()) - 1; i >= 0; --i) {
     uint8_t value = buffer.peek_ubyte(i);
     uint8_t newByte = ~value & 0xff;
     if (carry) {
@@ -59,27 +57,22 @@ std::string mcHexDigest(const std::string& hashIn) {
   return result;
 }
 
-void PacketLoginInEncryptionResponse::handle(
-    const std::shared_ptr<Connection>& conn,
-    const std::unique_ptr<ByteBuffer>& buffer) {
+void PacketLoginInEncryptionResponse::handle(const std::shared_ptr<Connection>& conn,
+                                             const std::unique_ptr<ByteBuffer>& buffer) {
   LOG(INFO) << "Encryption response received, beginning validation...";
 
   int32_t shared_secret_length = buffer->read_varint();
-  std::vector<uint8_t> encrypted_shared_secret =
-      buffer->read_ubytes(shared_secret_length);
+  std::vector<uint8_t> encrypted_shared_secret = buffer->read_ubytes(shared_secret_length);
 
   int32_t verify_token_length = buffer->read_varint();
-  std::vector<uint8_t> encrypted_verify_token =
-      buffer->read_ubytes(verify_token_length);
+  std::vector<uint8_t> encrypted_verify_token = buffer->read_ubytes(verify_token_length);
 
   RSAKeypair keypair = MinecraftServer::get_server()->get_rsa_keypair();
 
-  std::vector<uint8_t> decrypted_verify_token =
-      keypair.decrypt(encrypted_verify_token);
+  std::vector<uint8_t> decrypted_verify_token = keypair.decrypt(encrypted_verify_token);
   decrypted_verify_token.resize(celerity::VERIFY_TOKEN_SIZE);
 
-  std::vector<uint8_t> decrypted_shared_secret =
-      keypair.decrypt(encrypted_shared_secret);
+  std::vector<uint8_t> decrypted_shared_secret = keypair.decrypt(encrypted_shared_secret);
   decrypted_shared_secret.resize(celerity::SHARED_SECRET_SIZE);
   conn->enable_encryption(decrypted_shared_secret);
 
@@ -87,23 +80,19 @@ void PacketLoginInEncryptionResponse::handle(
   if (!verify_token || verify_token->empty()) {
     LOG(ERROR) << "Verify token was not stored by the server. Cannot validate "
                   "this client.";
-    auto pkt = PacketLoginOutDisconnect(
-        "Failed to find your verify token. Try again.");
+    auto pkt = PacketLoginOutDisconnect("Failed to find your verify token. Try again.");
     pkt.send(conn);
     return;
   }
 
   try {
-    if (decrypted_verify_token !=
-        boost::any_cast<std::vector<uint8_t>>(*verify_token)) {
+    if (decrypted_verify_token != boost::any_cast<std::vector<uint8_t>>(*verify_token)) {
       throw std::runtime_error("Invalid verify token");
     }
   } catch (const std::exception& e) {
-    LOG(WARNING) << "Failed to validate connection's verify token: "
-                 << e.what();
+    LOG(WARNING) << "Failed to validate connection's verify token: " << e.what();
 
-    auto pkt = PacketLoginOutDisconnect("Verify token validation failed: " +
-                                        std::string(e.what()));
+    auto pkt = PacketLoginOutDisconnect("Verify token validation failed: " + std::string(e.what()));
     pkt.send(conn);
     return;
   }
@@ -121,8 +110,7 @@ void PacketLoginInEncryptionResponse::handle(
 
   LOG(INFO) << "OK. Creating Yggdrasil request payload...";
 
-  std::shared_ptr<player::Player> player =
-      MinecraftServer::get_server()->get_player(conn->get_unique_id());
+  std::shared_ptr<player::Player> player = MinecraftServer::get_server()->get_player(conn->get_unique_id());
   std::map<std::string, std::string> params;
   params.insert({"username", player->get_username()});
   params.insert({"serverId", finalDigest});
@@ -131,13 +119,11 @@ void PacketLoginInEncryptionResponse::handle(
 
   std::string resp_body;
   int64_t resp_code{};
-  bool request_status =
-      HttpClient::get_url(SESSION_URL, params, &resp_body, &resp_code);
+  bool request_status = HttpClient::get_url(SESSION_URL, params, &resp_body, &resp_code);
   if (!request_status || resp_code != 200) {
     LOG(WARNING) << "Failed to log in to Mojang. Sending disconnection...";
 
-    PacketLoginOutDisconnect pkt(
-        "Failed to register your session with Mojang. Try again later.");
+    PacketLoginOutDisconnect pkt("Failed to register your session with Mojang. Try again later.");
     pkt.send(conn);
     return;
   }
@@ -147,8 +133,7 @@ void PacketLoginInEncryptionResponse::handle(
   Json::Value resp_json;
   Json::Reader reader;
   if (!reader.parse(resp_body, resp_json)) {
-    PacketLoginOutDisconnect pkt(
-        "Failed to parse Mojang's response. Mojang issue? Try again later.");
+    PacketLoginOutDisconnect pkt("Failed to parse Mojang's response. Mojang issue? Try again later.");
     pkt.send(conn);
     return;
   }
@@ -160,12 +145,10 @@ void PacketLoginInEncryptionResponse::handle(
       signature = property["signature"].asString();
     }
 
-    properties.emplace_back(property["name"].asString(),
-                            property["value"].asString(), signature);
+    properties.emplace_back(property["name"].asString(), property["value"].asString(), signature);
   }
 
-  std::string canonicalized_unique_id =
-      util::UUIDUtil::canonicalize_uuid(resp_json["id"].asString());
+  std::string canonicalized_unique_id = util::UUIDUtil::canonicalize_uuid(resp_json["id"].asString());
 
   auto maybe_unique_id = uuids::uuid::from_string(canonicalized_unique_id);
   if (!maybe_unique_id.has_value()) {
@@ -179,21 +162,16 @@ void PacketLoginInEncryptionResponse::handle(
 
   auto unique_id = maybe_unique_id.value();
 
-  player::MojangProfile profile(unique_id, resp_json["name"].asString(),
-                                properties);
+  player::MojangProfile profile(unique_id, resp_json["name"].asString(), properties);
 
   player->set_mojang_profile(std::make_shared<player::MojangProfile>(profile));
 
-  LOG(INFO)
-      << "OK. Checking if we need to enable compression for the connection...";
+  LOG(INFO) << "OK. Checking if we need to enable compression for the connection...";
 
-  const auto compression_threshold = MinecraftServer::get_server()
-                                         ->get_config_manager()
-                                         .get_server_config()
-                                         .get_compression_threshold();
+  const auto compression_threshold =
+      MinecraftServer::get_server()->get_config_manager().get_server_config().get_compression_threshold();
   if (compression_threshold > 0) {
-    LOG(INFO) << "Enabling connection compression with threshold "
-              << compression_threshold;
+    LOG(INFO) << "Enabling connection compression with threshold " << compression_threshold;
 
     PacketLoginOutSetCompression set_compression{};
     set_compression.send(conn);
@@ -202,8 +180,7 @@ void PacketLoginInEncryptionResponse::handle(
 
   LOG(INFO) << "OK. Sending login success...";
 
-  PacketLoginOutLoginSuccess resp(unique_id, player->get_username(),
-                                  properties);
+  PacketLoginOutLoginSuccess resp(unique_id, player->get_username(), properties);
   resp.send(conn);
 }
 }  // namespace celerity::net::login

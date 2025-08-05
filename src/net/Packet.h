@@ -38,7 +38,6 @@ constexpr std::ostream& operator<<(std::ostream& os, const PacketDirection& dire
   return os << name;
 }
 
-
 }  // namespace celerity::net
 
 #endif

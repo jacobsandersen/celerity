@@ -16,4 +16,4 @@ struct PongResponsePacket final : Packet {
 };
 }  // namespace celerity::net::status
 
-#endif //PINGRESPONSEPACKET_H
+#endif  // PINGRESPONSEPACKET_H
