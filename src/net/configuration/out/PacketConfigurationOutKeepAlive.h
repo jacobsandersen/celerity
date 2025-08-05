@@ -8,8 +8,7 @@ class PacketConfigurationOutKeepAlive : public OutboundPacket {
  public:
   PacketConfigurationOutKeepAlive() : OutboundPacket(0x04) {}
 
-  void write_data(const std::shared_ptr<Connection>& conn,
-                  ByteBuffer& buffer) override;
+  void write_data(ByteBuffer& buffer) override;
 };
 }  // namespace celerity::net::configuration
 

@@ -1,6 +1,6 @@
 #include "BasicTimer.h"
 
-#include <glog/logging.h>
+#include <absl/log/log.h>
 
 namespace celerity {
 void BasicTimer::start(const std::chrono::seconds& duration,

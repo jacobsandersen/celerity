@@ -12,8 +12,7 @@ find_package(cryptopp CONFIG REQUIRED)
 find_package(stduuid CONFIG REQUIRED)
 find_package(CURL REQUIRED)
 find_package(toml11 CONFIG REQUIRED)
-find_package(glog CONFIG REQUIRED)
-find_package(gflags CONFIG REQUIRED)
+find_package(absl CONFIG REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(PkgConfig REQUIRED)
 
@@ -39,12 +38,13 @@ target_sources(celerity PRIVATE
         src/net/Connection.cpp
         src/net/NetworkManager.cpp
         src/net/HttpClient.cpp
-        src/net/OutboundPacket.cpp
-        src/net/handshaking/in/PacketHandshakingInHandshake.cpp
-        src/net/status/in/PacketStatusInStatusRequest.cpp
-        src/net/status/in/PacketStatusInPingRequest.cpp
-        src/net/status/out/PacketStatusOutStatusResponse.cpp
-        src/net/status/out/PacketStatusOutPingResponse.cpp
+        src/net/handshaking/HandshakingPacketRegistry.cpp
+        src/net/handshaking/IntentionPacket.cpp
+        src/net/status/StatusPacketRegistry.cpp
+        src/net/status/StatusRequestPacket.cpp
+        src/net/status/StatusResponsePacket.cpp
+        src/net/status/PingRequestPacket.cpp
+        src/net/status/PongResponsePacket.cpp
         src/net/login/in/PacketLoginInLoginStart.cpp
         src/net/login/in/PacketLoginInEncryptionResponse.cpp
         src/net/login/in/PacketLoginInLoginAcknowledged.cpp
@@ -91,6 +91,6 @@ target_sources(celerity PRIVATE FILE_SET nbt_headers TYPE HEADERS FILES
 
 target_link_libraries(celerity PRIVATE
         Boost::asio Boost::endian Boost::any JsonCpp::JsonCpp cryptopp::cryptopp stduuid
-        CURL::libcurl toml11::toml11 glog::glog gflags::gflags ZLIB::ZLIB
+        CURL::libcurl toml11::toml11 absl::log ZLIB::ZLIB
         PkgConfig::ICU
 )

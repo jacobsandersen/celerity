@@ -1,7 +1,5 @@
 #include "MinecraftServer.h"
 
-#include <glog/logging.h>
-
 #include "VarInt.h"
 
 namespace celerity {

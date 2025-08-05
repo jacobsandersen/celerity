@@ -1,5 +1,3 @@
-#include <glog/logging.h>
-
 #include <iostream>
 
 #include "ByteBuffer.h"
@@ -9,9 +7,6 @@
 #include "nbt/tag/TagString.h"
 
 int main(int argc, char* argv[]) {
-  google::InitGoogleLogging(argv[0]);
-  FLAGS_alsologtostderr = true;
-
   celerity::ByteBuffer my_buffer;
   celerity::nbt::NBTWriter writer(my_buffer);
 

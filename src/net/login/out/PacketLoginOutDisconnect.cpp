@@ -6,8 +6,7 @@
 #include <iostream>
 
 namespace celerity::net::login {
-void PacketLoginOutDisconnect::write_data(
-    const std::shared_ptr<Connection>& conn, ByteBuffer& buffer) {
+void PacketLoginOutDisconnect::write_data(ByteBuffer& buffer) {
   Json::Value response;
   response["text"] = "Disconnected during login: " + m_reason;
   response["bold"] = true;

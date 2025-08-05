@@ -14,8 +14,7 @@ class PacketLoginOutDisconnect : public OutboundPacket {
   explicit PacketLoginOutDisconnect(std::string reason)
       : OutboundPacket(0x00), m_reason(std::move(reason)) {}
 
-  void write_data(const std::shared_ptr<Connection> &conn,
-                  ByteBuffer &buffer) override;
+  void write_data(ByteBuffer &buffer) override;
 
  private:
   std::string m_reason;

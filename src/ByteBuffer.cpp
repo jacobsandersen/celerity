@@ -1,6 +1,6 @@
 #include "ByteBuffer.h"
 
-#include <glog/logging.h>
+#include <absl/log/log.h>
 #include <unicode/schriter.h>
 #include <zlib.h>
 

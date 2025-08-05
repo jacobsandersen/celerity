@@ -5,8 +5,7 @@
 #include "PacketConfigurationOutDisconnect.h"
 
 namespace celerity::net::configuration {
-void PacketConfigurationOutKeepAlive::write_data(
-    const std::shared_ptr<Connection>& conn, ByteBuffer& buffer) {
+void PacketConfigurationOutKeepAlive::write_data(ByteBuffer& buffer) {
   int64_t payload = std::time(nullptr);
   buffer.write_be_long(payload);
 

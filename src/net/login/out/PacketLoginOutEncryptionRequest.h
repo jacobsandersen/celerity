@@ -25,8 +25,7 @@ class PacketLoginOutEncryptionRequest : public OutboundPacket {
         verify_token_bytes(verify_token_bytes),
         should_authenticate(should_authenticate) {}
 
-  void write_data(const std::shared_ptr<Connection>& conn,
-                  ByteBuffer& buffer) override;
+  void write_data(ByteBuffer& buffer) override;
 
  private:
   std::string server_id;

@@ -1,8 +1,7 @@
 #include "PacketLoginOutLoginSuccess.h"
 
 namespace celerity::net::login {
-void PacketLoginOutLoginSuccess::write_data(
-    const std::shared_ptr<Connection> &conn, ByteBuffer &buffer) {
+void PacketLoginOutLoginSuccess::write_data(ByteBuffer &buffer) {
   if (m_username.length() > 16) {
     throw std::invalid_argument(
         "Tried to send login success with username longer than 16 characters.");

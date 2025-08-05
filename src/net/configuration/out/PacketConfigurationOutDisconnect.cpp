@@ -4,8 +4,7 @@
 #include <json/writer.h>
 
 namespace celerity::net::configuration {
-void PacketConfigurationOutDisconnect::write_data(
-    const std::shared_ptr<Connection>& conn, ByteBuffer& buffer) {
+void PacketConfigurationOutDisconnect::write_data(ByteBuffer& buffer) {
   Json::Value response;
   response["text"] = "Disconnected during configuration: " + m_reason;
   response["bold"] = true;

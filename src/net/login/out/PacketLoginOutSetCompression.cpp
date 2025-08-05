@@ -5,8 +5,7 @@
 #include "../../../MinecraftServer.h"
 
 namespace celerity::net::login {
-void PacketLoginOutSetCompression::write_data(
-    const std::shared_ptr<Connection>& conn, ByteBuffer& buffer) {
+void PacketLoginOutSetCompression::write_data(ByteBuffer& buffer) {
   const auto compression_threshold = MinecraftServer::get_server()
                                          ->get_config_manager()
                                          .get_server_config()

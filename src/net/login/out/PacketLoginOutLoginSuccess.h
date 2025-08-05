@@ -21,8 +21,7 @@ class PacketLoginOutLoginSuccess : public OutboundPacket {
         m_username(std::move(username)),
         m_properties(std::move(properties)) {}
 
-  void write_data(const std::shared_ptr<Connection> &conn,
-                  ByteBuffer &buffer) override;
+  void write_data(ByteBuffer &buffer) override;
 
  private:
   uuids::uuid m_unique_id;

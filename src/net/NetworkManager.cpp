@@ -1,6 +1,6 @@
 #include "NetworkManager.h"
 
-#include <glog/logging.h>
+#include <absl/log/log.h>
 
 #include "../BufferCompressor.h"
 #include "../MinecraftServer.h"

@@ -5,10 +5,10 @@
 #ifndef CELERITY_NET_CONFIGURATION_PACKETCONFIGURATIONINKNOWNPACKS_H
 #define CELERITY_NET_CONFIGURATION_PACKETCONFIGURATIONINKNOWNPACKS_H
 
-#include "../../InboundPacket.h"
+#include "../../Packet.h"
 
 namespace celerity::net::configuration {
-class PacketConfigurationInKnownPacks final : public InboundPacket {
+class PacketConfigurationInKnownPacks final : public Packet {
  public:
   void handle(const std::shared_ptr<Connection>& conn,
               const std::unique_ptr<ByteBuffer>& buffer) override;
