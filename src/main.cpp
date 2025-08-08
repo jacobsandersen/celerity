@@ -1,12 +1,17 @@
 #include <iostream>
 
-#include "ByteBuffer.h"
+#include <absl/log/initialize.h>
+#include <absl/log/globals.h>
+
 #include "MinecraftServer.h"
 #include "nbt/NBTWriter.h"
 #include "nbt/TagCompoundBuilder.h"
 #include "nbt/tag/TagString.h"
 
 int main(int argc, char* argv[]) {
+  absl::SetStderrThreshold(absl::LogSeverity::kInfo);
+  absl::InitializeLog();
+
   celerity::ByteBuffer my_buffer;
   celerity::nbt::NBTWriter writer(my_buffer);
 
@@ -16,8 +21,7 @@ int main(int argc, char* argv[]) {
 
   writer.write_tag(test);
 
-  std::cout << "Test NBT write:" << std::endl;
-  std::cout << my_buffer.to_hex_string() << std::endl;
+  LOG(INFO) << "Test NBT write: " << my_buffer.to_hex_string();
 
   celerity::MinecraftServer::get_server()->start();
 }
