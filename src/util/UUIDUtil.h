@@ -8,10 +8,13 @@
 
 namespace celerity::util {
 class UUIDUtil {
+ private:
+  UUIDUtil() = default;
+
  public:
   static bool valid_undashed_uuid(std::string uuid);
-
   static std::string canonicalize_uuid(const std::string &uuid_no_dashes);
+  static uuids::uuid generate_random_uuid();
 };
 }  // namespace celerity::util
 

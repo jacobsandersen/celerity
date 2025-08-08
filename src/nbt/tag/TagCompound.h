@@ -12,17 +12,12 @@ class TagCompound final : public Tag {
  public:
   TagCompound() : Tag(TagType::Compound) {}
 
-  void add(const icu::UnicodeString& name, std::unique_ptr<Tag> value) {
-    add({name, std::move(value)});
-  }
+  void add(const icu::UnicodeString& name, std::unique_ptr<Tag> value) { add({name, std::move(value)}); }
 
-  void add(NamedTag&& named_tag) {
-    m_internal_list.push_back(std::move(named_tag));
-  }
+  void add(NamedTag&& named_tag) { m_internal_list.push_back(std::move(named_tag)); }
 
-  [[nodiscard]] std::vector<NamedTag>& get_tags() {
-    return m_internal_list;
-  }
+  [[nodiscard]] std::vector<NamedTag>& get_tags() { return m_internal_list; }
+
  private:
   std::vector<NamedTag> m_internal_list;
 };

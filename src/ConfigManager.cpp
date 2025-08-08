@@ -1,7 +1,5 @@
 #include "ConfigManager.h"
 
 namespace celerity {
-const toml::value &ConfigManager::get_server_config() const {
-  return m_server_config;
-}
+const ServerConfig& ConfigManager::get_server_config() const { return server_config_; }
 }  // namespace celerity

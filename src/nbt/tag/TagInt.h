@@ -12,6 +12,7 @@ class TagInt final : public Tag {
  public:
   explicit TagInt(const int16_t value) : Tag(TagType::Int), m_value(value) {}
   [[nodiscard]] int32_t get_int() const { return m_value; }
+
  private:
   int32_t m_value;
 };

@@ -10,8 +10,7 @@
 namespace celerity::nbt::tag {
 class TagDouble final : public Tag {
  public:
-  explicit TagDouble(const double value)
-      : Tag(TagType::Double), m_value(value) {}
+  explicit TagDouble(const double value) : Tag(TagType::Double), m_value(value) {}
   [[nodiscard]] double get_double() const { return m_value; }
 
  private:

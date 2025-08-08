@@ -14,9 +14,7 @@ ByteBuffer& BufferCrypter::encrypt(ByteBuffer& buffer) {
 
   auto enc_bytes = std::vector<uint8_t>{};
   CryptoPP::VectorSource src(
-      bytes, true,
-      new CryptoPP::StreamTransformationFilter(
-          m_enc_cipher, new CryptoPP::VectorSink(enc_bytes)));
+      bytes, true, new CryptoPP::StreamTransformationFilter(m_enc_cipher, new CryptoPP::VectorSink(enc_bytes)));
   buffer.set_bytes(enc_bytes);
 
   return buffer;
@@ -28,10 +26,8 @@ ByteBuffer& BufferCrypter::decrypt(ByteBuffer& buffer) {
   buffer.reset();
 
   auto bytes = std::vector<uint8_t>{};
-  CryptoPP::VectorSource src(
-      enc_bytes, true,
-      new CryptoPP::StreamTransformationFilter(
-          m_dec_cipher, new CryptoPP::VectorSink(bytes)));
+  CryptoPP::VectorSource src(enc_bytes, true,
+                             new CryptoPP::StreamTransformationFilter(m_dec_cipher, new CryptoPP::VectorSink(bytes)));
   buffer.set_bytes(bytes);
 
   return buffer;

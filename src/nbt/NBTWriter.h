@@ -10,11 +10,13 @@
 namespace celerity::nbt {
 class NBTWriter {
   ByteBuffer& buffer_;
-public:
+
+ public:
   explicit NBTWriter(ByteBuffer& buffer) : buffer_(buffer) {}
   void write_tag(tag::NamedTag& tag);
-private:
+
+ private:
   void write_payload(std::unique_ptr<tag::Tag>& tag);
 };
 }  // namespace celerity::nbt
-#endif //NBTWRITER_H
+#endif  // NBTWRITER_H

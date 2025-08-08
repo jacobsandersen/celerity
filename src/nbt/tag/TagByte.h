@@ -10,9 +10,10 @@
 namespace celerity::nbt::tag {
 class TagByte final : public Tag {
   int8_t byte_;
-public:
+
+ public:
   explicit TagByte(const int8_t byte) : Tag(TagType::Byte), byte_(byte) {}
- [[nodiscard]] int8_t get_byte() const { return byte_; }
+  [[nodiscard]] int8_t get_byte() const { return byte_; }
 };
 }  // namespace celerity::nbt::tag
 

@@ -12,6 +12,7 @@ class TagLong final : public Tag {
  public:
   explicit TagLong(const int64_t value) : Tag(TagType::Long), m_value(value) {}
   [[nodiscard]] int64_t get_long() const { return m_value; }
+
  private:
   int64_t m_value;
 };

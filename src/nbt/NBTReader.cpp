@@ -17,7 +17,8 @@
 #include "tag/TagString.h"
 
 namespace celerity::nbt {
-template <typename T, typename TagT> requires std::is_integral_v<T> && DerivedTag<TagT>
+template <typename T, typename TagT>
+  requires std::is_integral_v<T> && DerivedTag<TagT>
 std::unique_ptr<TagT> read_tag_array(ByteBuffer& buffer, const std::function<T(ByteBuffer&)>& read_fn) {
   const int32_t length = buffer.read_be_int();
   std::vector<T> items(length);
@@ -27,7 +28,7 @@ std::unique_ptr<TagT> read_tag_array(ByteBuffer& buffer, const std::function<T(B
   return std::make_unique<TagT>(items);
 }
 
-tag::NamedTag NBTReader::read_tag(const int depth) { // NOLINT(*-no-recursion)
+tag::NamedTag NBTReader::read_tag(const int depth) {  // NOLINT(*-no-recursion)
   const tag::TagType type = buffer_.read_nbt_tag_type();
 
   icu::UnicodeString name;
@@ -40,14 +41,13 @@ tag::NamedTag NBTReader::read_tag(const int depth) { // NOLINT(*-no-recursion)
   return {name, read_payload(type, depth)};
 }
 
-std::unique_ptr<tag::Tag> NBTReader::read_payload( // NOLINT(*-no-recursion)
+std::unique_ptr<tag::Tag> NBTReader::read_payload(  // NOLINT(*-no-recursion)
     const tag::TagType& type, const int depth) {
   switch (type.get_type_id()) {
     // End
     case 0: {
       if (depth == 0) {
-        throw std::domain_error(
-            "Read a TAG_End outside of a TAG_Compound or TAG_List");
+        throw std::domain_error("Read a TAG_End outside of a TAG_Compound or TAG_List");
       }
 
       return std::make_unique<tag::TagEnd>();
@@ -89,8 +89,7 @@ std::unique_ptr<tag::Tag> NBTReader::read_payload( // NOLINT(*-no-recursion)
       const tag::TagType inner_type = buffer_.read_nbt_tag_type();
       const int32_t length = buffer_.read_int();
       if (inner_type == tag::TagType::End && length > 0) {
-        throw std::domain_error(
-            "TAG_List with length > 0 may not contain TAG_End");
+        throw std::domain_error("TAG_List with length > 0 may not contain TAG_End");
       }
 
       auto list = std::make_unique<tag::TagList>(inner_type);

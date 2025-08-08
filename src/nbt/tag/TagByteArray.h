@@ -15,8 +15,7 @@ class TagByteArray final : public Tag {
   std::vector<int8_t> bytes_{};
 
  public:
-  explicit TagByteArray(std::vector<int8_t> bytes)
-      : Tag(TagType::ByteArray), bytes_(std::move(bytes)) {}
+  explicit TagByteArray(std::vector<int8_t> bytes) : Tag(TagType::ByteArray), bytes_(std::move(bytes)) {}
   [[nodiscard]] std::vector<int8_t> get_bytes() const { return bytes_; }
 };
 }  // namespace celerity::nbt::tag

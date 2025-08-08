@@ -3,38 +3,33 @@
 #include <iostream>
 
 namespace celerity {
-CryptoPP::RSA::PrivateKey *RSAKeypair::get_private_key() const {
-  return m_private_key;
-}
+CryptoPP::RSA::PrivateKey RSAKeypair::get_private_key() const { return m_private_key; }
 
-CryptoPP::RSA::PublicKey *RSAKeypair::get_public_key() const {
-  return m_public_key;
-}
+CryptoPP::RSA::PublicKey RSAKeypair::get_public_key() const { return m_public_key; }
 
 std::vector<uint8_t> RSAKeypair::get_der_encoded_public_key() const {
   std::vector<uint8_t> encodedPublicKey;
 
   CryptoPP::VectorSink vs(encodedPublicKey);
-  get_public_key()->DEREncode(vs);
+  get_public_key().DEREncode(vs);
   vs.MessageEnd();
 
   return encodedPublicKey;
 }
 
-std::vector<uint8_t> RSAKeypair::decrypt(
-    const std::vector<uint8_t> &encrypted) const {
+std::vector<uint8_t> RSAKeypair::decrypt(const std::vector<uint8_t> &encrypted) const {
   std::vector<uint8_t> decrypted;
 
-  CryptoPP::RSAES_PKCS1v15_Decryptor decryptor(*get_private_key());
+  const CryptoPP::RSAES_PKCS1v15_Decryptor decryptor(get_private_key());
 
-  size_t max_decrypted_size = decryptor.MaxPlaintextLength(encrypted.size());
+  const size_t max_decrypted_size = decryptor.MaxPlaintextLength(encrypted.size());
   decrypted.resize(max_decrypted_size);
 
   CryptoPP::AutoSeededRandomPool rng;
 
-  auto sink = new CryptoPP::ArraySink(decrypted.data(), decrypted.size());
-  auto filter = new CryptoPP::PK_DecryptorFilter(rng, decryptor, sink);
-  CryptoPP::ArraySource src(encrypted.data(), encrypted.size(), true, filter);
+  auto sink = CryptoPP::ArraySink(decrypted.data(), decrypted.size());
+  auto filter = CryptoPP::PK_DecryptorFilter(rng, decryptor, &sink);
+  CryptoPP::ArraySource src(encrypted.data(), encrypted.size(), true, &filter);
 
   return decrypted;
 }

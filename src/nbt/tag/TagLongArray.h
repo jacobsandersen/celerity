@@ -6,13 +6,13 @@
 #define CELERITY_NBT_TAG_TAGLONGARRAY_H
 
 #include <vector>
+
 #include "Tag.h"
 
 namespace celerity::nbt::tag {
 class TagLongArray final : public Tag {
  public:
-  explicit TagLongArray(std::vector<int64_t> data)
-      : Tag(TagType::LongArray), m_data(std::move(data)) {}
+  explicit TagLongArray(std::vector<int64_t> data) : Tag(TagType::LongArray), m_data(std::move(data)) {}
   [[nodiscard]] std::vector<int64_t> get_longs() const { return m_data; }
 
  private:

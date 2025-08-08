@@ -2,8 +2,7 @@
   "dependencies": [
     "cryptopp",
     "curl",
-    "gflags",
-    "glog",
+    "abseil",
     "icu",
     "jsoncpp",
     "stduuid",

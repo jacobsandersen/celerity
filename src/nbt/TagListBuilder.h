@@ -29,9 +29,7 @@ class TagListBuilder : public std::enable_shared_from_this<TagListBuilder<T>> {
     return this->shared_from_this();
   }
 
-  tag::NamedTag build() {
-    return { m_name, std::move(m_list) };
-  }
+  tag::NamedTag build() { return {m_name, std::move(m_list)}; }
 
  private:
   icu::UnicodeString m_name;

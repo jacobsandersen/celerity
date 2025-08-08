@@ -12,8 +12,7 @@ find_package(cryptopp CONFIG REQUIRED)
 find_package(stduuid CONFIG REQUIRED)
 find_package(CURL REQUIRED)
 find_package(toml11 CONFIG REQUIRED)
-find_package(glog CONFIG REQUIRED)
-find_package(gflags CONFIG REQUIRED)
+find_package(absl CONFIG REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(PkgConfig REQUIRED)
 
@@ -22,48 +21,56 @@ pkg_check_modules(ICU REQUIRED IMPORTED_TARGET icu-i18n icu-io icu-uc)
 add_executable(celerity src/main.cpp)
 
 target_sources(celerity PRIVATE
-        src/MinecraftServer.cpp
-        src/ConfigManager.cpp
         src/VarInt.cpp
+        src/ServerConfig.cpp
         src/RSAKeypair.cpp
-        src/ByteBuffer.cpp
-        src/BasicTimer.cpp
+        src/MinecraftServer.cpp
         src/KnownPack.cpp
-        src/BufferCompressor.cpp
+        src/ConfigManager.cpp
+        src/ByteBuffer.cpp
         src/BufferCrypter.cpp
+        src/BufferCompressor.cpp
+        src/util/RandUtil.cpp
         src/util/UUIDUtil.cpp
-        src/player/Player.cpp
         src/player/MojangProfile.cpp
-        src/player/ClientInformation.cpp
-        src/net/Connection.cpp
+        src/player/Player.cpp
         src/net/NetworkManager.cpp
         src/net/HttpClient.cpp
-        src/net/OutboundPacket.cpp
-        src/net/handshaking/in/PacketHandshakingInHandshake.cpp
-        src/net/status/in/PacketStatusInStatusRequest.cpp
-        src/net/status/in/PacketStatusInPingRequest.cpp
-        src/net/status/out/PacketStatusOutStatusResponse.cpp
-        src/net/status/out/PacketStatusOutPingResponse.cpp
-        src/net/login/in/PacketLoginInLoginStart.cpp
-        src/net/login/in/PacketLoginInEncryptionResponse.cpp
-        src/net/login/in/PacketLoginInLoginAcknowledged.cpp
-        src/net/login/in/PacketLoginInLoginPluginResponse.cpp
-        src/net/login/out/PacketLoginOutEncryptionRequest.cpp
-        src/net/login/out/PacketLoginOutDisconnect.cpp
-        src/net/login/out/PacketLoginOutLoginSuccess.cpp
-        src/net/login/out/PacketLoginOutLoginPluginRequest.cpp
-        src/net/login/out/PacketLoginOutSetCompression.cpp
-        src/net/configuration/in/PacketConfigurationInClientInformation.cpp
-        src/net/configuration/in/PacketConfigurationInPluginMessage.cpp
-        src/net/configuration/in/PacketConfigurationInKeepAlive.cpp
-        src/net/configuration/out/PacketConfigurationOutKeepAlive.cpp
-        src/net/configuration/out/PacketConfigurationOutDisconnect.cpp
-        src/net/configuration/out/PacketConfigurationOutRegistryData.cpp
-        src/net/configuration/out/PacketConfigurationOutFeatureFlags.cpp
-        src/net/configuration/out/PacketConfigurationOutKnownPacks.cpp
-        src/net/configuration/in/PacketConfigurationInKnownPacks.cpp
-        src/nbt/NBTReader.cpp
+        src/net/Connection.cpp
+        src/net/handshaking/HandshakingPacketRegistry.cpp
+        src/net/handshaking/serverbound/IntentionPacket.cpp
+        src/net/status/StatusPacketRegistry.cpp
+        src/net/status/clientbound/StatusResponsePacket.cpp
+        src/net/status/clientbound/PongResponsePacket.cpp
+        src/net/status/serverbound/StatusRequestPacket.cpp
+        src/net/status/serverbound/PingRequestPacket.cpp
+        src/net/login/LoginPacketRegistry.cpp
+        src/net/login/clientbound/CookieRequestPacket.cpp
+        src/net/login/clientbound/CustomQueryPacket.cpp
+        src/net/login/clientbound/HelloPacket.cpp
+        src/net/login/clientbound/LoginCompressionPacket.cpp
+        src/net/login/clientbound/LoginDisconnectPacket.cpp
+        src/net/login/clientbound/LoginFinishedPacket.cpp
+        src/net/login/serverbound/CookieResponsePacket.cpp
+        src/net/login/serverbound/CustomQueryAnswerPacket.cpp
+        src/net/login/serverbound/HelloPacket.cpp
+        src/net/login/serverbound/KeyPacket.cpp
+        src/net/login/serverbound/LoginAcknowledgedPacket.cpp
+        src/net/configuration/ConfigurationPacketRegistry.cpp
+        src/net/configuration/clientbound/CookieRequestPacket.cpp
+        src/net/configuration/clientbound/CustomPayloadPacket.cpp
+        src/net/configuration/clientbound/DisconnectPacket.cpp
+        src/net/configuration/clientbound/FinishConfigurationPacket.cpp
+        src/net/configuration/clientbound/KeepAlivePacket.cpp
+        src/net/configuration/clientbound/PingPacket.cpp
+        src/net/configuration/clientbound/SelectKnownPacksPacket.cpp
+        src/net/configuration/clientbound/UpdateEnabledFeaturesPacket.cpp
+        src/net/configuration/serverbound/ClientInformationPacket.cpp
+        src/net/configuration/serverbound/CustomPayloadPacket.cpp
+        src/net/configuration/serverbound/KeepAlivePacket.cpp
+        src/net/configuration/serverbound/SelectKnownPacksPacket.cpp
         src/nbt/NBTWriter.cpp
+        src/nbt/NBTReader.cpp
 )
 
 target_sources(celerity PRIVATE FILE_SET nbt_headers TYPE HEADERS FILES
@@ -90,6 +97,6 @@ target_sources(celerity PRIVATE FILE_SET nbt_headers TYPE HEADERS FILES
 
 target_link_libraries(celerity PRIVATE
         Boost::asio Boost::endian Boost::any JsonCpp::JsonCpp cryptopp::cryptopp stduuid
-        CURL::libcurl toml11::toml11 glog::glog gflags::gflags ZLIB::ZLIB
+        CURL::libcurl toml11::toml11 absl::log ZLIB::ZLIB
         PkgConfig::ICU
 )

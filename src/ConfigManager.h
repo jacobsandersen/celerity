@@ -3,15 +3,17 @@
 
 #include <toml.hpp>
 
+#include "ServerConfig.h"
+
 namespace celerity {
 class ConfigManager {
  public:
-  ConfigManager() : m_server_config(toml::parse("../server.toml")) {}
+  explicit ConfigManager(const std::filesystem::path& server_root) : server_config_(server_root) {}
 
-  [[nodiscard]] const toml::value &get_server_config() const;
+  [[nodiscard]] const ServerConfig& get_server_config() const;
 
  private:
-  toml::value m_server_config;
+  ServerConfig server_config_;
 };
 }  // namespace celerity
 

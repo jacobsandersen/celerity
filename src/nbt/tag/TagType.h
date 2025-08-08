@@ -23,8 +23,7 @@ class TagType {
 
   static TagType type_id_to_type(const uint8_t type_id) {
     if (type_id > 12) {
-      throw std::invalid_argument(
-          "Tried to get Tag Type with Tag Type ID > 12.");
+      throw std::invalid_argument("Tried to get Tag Type with Tag Type ID > 12.");
     }
 
     return *Types[type_id];
@@ -39,8 +38,7 @@ class TagType {
   bool operator!=(const TagType& rhs) const { return !operator==(rhs); }
 
  private:
-  TagType(const uint8_t type_id, std::string type_name)
-      : type_id_(type_id), type_name_(std::move(type_name)) {}
+  TagType(const uint8_t type_id, std::string type_name) : type_id_(type_id), type_name_(std::move(type_name)) {}
 
   uint8_t type_id_;
   std::string type_name_;
@@ -60,11 +58,9 @@ inline const TagType TagType::Compound{10, "TAG_Compound"};
 inline const TagType TagType::IntArray{11, "TAG_IntArray"};
 inline const TagType TagType::LongArray{12, "TAG_LongArray"};
 inline const TagType* TagType::Types[13] = {
-    &TagType::End,      &TagType::Byte,      &TagType::Short,
-    &TagType::Int,      &TagType::Long,      &TagType::Float,
-    &TagType::Double,   &TagType::ByteArray, &TagType::String,
-    &TagType::List,     &TagType::Compound,  &TagType::IntArray,
-    &TagType::LongArray};
+    &TagType::End,      &TagType::Byte,     &TagType::Short,     &TagType::Int,    &TagType::Long,
+    &TagType::Float,    &TagType::Double,   &TagType::ByteArray, &TagType::String, &TagType::List,
+    &TagType::Compound, &TagType::IntArray, &TagType::LongArray};
 }  // namespace celerity::nbt::tag
 
 #endif

@@ -13,12 +13,13 @@
 namespace celerity::nbt {
 class NBTReader {
   ByteBuffer& buffer_;
-public:
+
+ public:
   explicit NBTReader(ByteBuffer& buffer) : buffer_(buffer) {}
   tag::NamedTag read_tag(int depth);
-private:
-  std::unique_ptr<tag::Tag> read_payload(
-      const tag::TagType& type, int depth);
+
+ private:
+  std::unique_ptr<tag::Tag> read_payload(const tag::TagType& type, int depth);
 };
 }  // namespace celerity::nbt
 

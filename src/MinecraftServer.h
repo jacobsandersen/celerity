@@ -32,28 +32,34 @@ class MinecraftServer {
 
   std::shared_ptr<player::Player> get_player(const std::string& username);
 
-  std::shared_ptr<player::Player> get_player(
-      const std::shared_ptr<uuids::uuid>& unique_id);
+  std::shared_ptr<player::Player> get_player(const std::shared_ptr<uuids::uuid>& unique_id);
 
   void remove_player(const std::shared_ptr<uuids::uuid>& unique_id);
 
   void add_player(const std::shared_ptr<player::Player>&);
 
-  const std::vector<KnownPack>& get_known_packs() const;
+  [[nodiscard]] std::filesystem::path get_server_root() const;
+
+  [[nodiscard]] const std::vector<KnownPack>& get_known_packs() const;
 
  private:
-  MinecraftServer() : m_version_name("1.21.7"), m_protocol_version(772) {
-    m_known_packs.emplace_back("minecraft", "core", "1.21.5");
+  MinecraftServer()
+      : server_root_(std::filesystem::current_path()),
+        config_manager_(server_root_),
+        network_manager_(config_manager_.get_server_config()),
+        version_name_("1.21.7"),
+        protocol_version_(772) {
+    known_packs_.emplace_back("minecraft", "core", "1.21.5");
   }
 
-  net::NetworkManager m_network_manager;
-  ConfigManager m_config_manager;
-  RSAKeypair m_rsa_keypair;
-  std::string m_version_name;
-  uint32_t m_protocol_version;
-  std::vector<KnownPack> m_known_packs;
-
-  std::vector<std::shared_ptr<player::Player>> m_players{};
+  std::filesystem::path server_root_;
+  ConfigManager config_manager_;
+  net::NetworkManager network_manager_;
+  RSAKeypair rsa_keypair_;
+  std::string version_name_;
+  uint32_t protocol_version_;
+  std::vector<KnownPack> known_packs_;
+  std::vector<std::shared_ptr<player::Player>> players_{};
 };
 }  // namespace celerity
 #endif

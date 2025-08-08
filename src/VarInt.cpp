@@ -33,8 +33,7 @@ int32_t VarInt::decode_varint(ByteBuffer* buf, uint8_t* bytes_read) {
   return value;
 }
 
-void VarInt::encode_varint(int32_t value, int8_t* buffer,
-                           uint8_t* bytes_written) {
+void VarInt::encode_varint(int32_t value, int8_t* buffer, uint8_t* bytes_written) {
   int8_t position = 0;
 
   if (bytes_written) *bytes_written = 0;
@@ -81,8 +80,7 @@ int64_t VarInt::decode_varlong(ByteBuffer* buf, uint8_t* bytes_read) {
   return value;
 }
 
-void VarInt::encode_varlong(int64_t value, int8_t* buffer,
-                            uint8_t* bytes_written) {
+void VarInt::encode_varlong(int64_t value, int8_t* buffer, uint8_t* bytes_written) {
   int position = 0;
 
   if (bytes_written) *bytes_written = 0;

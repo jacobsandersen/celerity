@@ -1,74 +1,58 @@
 #ifndef CELERITY_NET_CONNECTION_H
 #define CELERITY_NET_CONNECTION_H
 
+#include <absl/log/log.h>
 #include <cryptopp/modes.h>
 #include <uuid.h>
 
 #include <boost/any.hpp>
 #include <boost/asio.hpp>
-#include <deque>
 
-#include "../BasicTimer.h"
 #include "../BufferCrypter.h"
 #include "../ByteBuffer.h"
 #include "../KnownPack.h"
+#include "ConnectionState.h"
+#include "PacketRegistry.h"
+#include "src/Scheduler.h"
 
 namespace celerity::net {
-enum class ConnectionState { Handshaking, Status, Login, Configuration, Play };
-
-enum class BufferReadState {
-  ReadPacketLength,
-  ReadDataLength,
-  DecompressData,
-  ReadPacketId,
-  HandlePacket
-};
-
-struct BufferReadContext {
-  BufferReadState read_state = BufferReadState::ReadPacketLength;
-  std::unique_ptr<ByteBuffer> partial_buffer = nullptr;
-  std::unique_ptr<int32_t> packet_length = nullptr;
-  std::unique_ptr<int32_t> data_length = nullptr;
-  std::unique_ptr<int32_t> packet_id = nullptr;
-};
-
-class Connection {
+class Connection : std::enable_shared_from_this<Connection> {
  public:
-  explicit Connection(boost::asio::io_context& context)
-      : m_context(context), m_socket(context) {}
+  explicit Connection(boost::asio::ip::tcp::socket socket, std::function<void(Connection*)> disconnect_callback)
+      : m_socket(std::move(socket)),
+        scheduler_(m_socket.get_executor()),
+        disconnect_callback_(std::move(disconnect_callback)),
+        incoming_packet_strand_(m_socket.get_executor()) {}
 
-  boost::asio::io_context& get_context() const;
+  ~Connection() { scheduler_.cancel_all(); }
+
+  void start();
 
   [[nodiscard]] boost::asio::ip::tcp::socket* get_socket();
 
-  [[nodiscard]] ByteBuffer& get_data_buffer();
+  bool set_context_value(const std::string& key, const boost::any& value);
 
-  [[nodiscard]] BufferReadContext& get_read_context();
+  [[nodiscard]] std::optional<boost::any> get_context_value(const std::string& key) const;
 
-  [[nodiscard]] ConnectionState get_state() const;
+  [[nodiscard]] bool has_context_value(const std::string& key) const;
+
+  [[nodiscard]] Scheduler& get_scheduler() { return scheduler_; }
 
   void set_state(ConnectionState state);
 
-  bool add_context_value(const std::string& key, boost::any value);
-
-  [[nodiscard]] boost::any get_context_value(const std::string& key) const;
+  [[nodiscard]] ConnectionState get_state() const;
 
   [[nodiscard]] const std::shared_ptr<uuids::uuid>& get_unique_id() const;
 
   void set_unique_id(const std::shared_ptr<uuids::uuid>& unique_id);
 
-  void start_new_timer(std::chrono::seconds timeout,
-                       const std::function<void()>& callback);
+  [[nodiscard]] int64_t get_keep_alive_payload() const;
 
-  [[nodiscard]] int64_t get_last_keep_alive_payload() const;
-
-  void set_last_keep_alive_payload(int64_t keep_alive_payload);
-
-  [[nodiscard]] bool get_compress_packets() const;
+  [[nodiscard]] bool is_compression_enabled() const;
 
   void enable_compression();
 
-  [[nodiscard]] bool get_encrypt_packets() const;
+  [[nodiscard]] bool is_encryption_enabled() const;
 
   void enable_encryption(const std::vector<uint8_t>& shared_secret);
 
@@ -78,22 +62,40 @@ class Connection {
 
   std::vector<KnownPack> get_known_packs() const;
 
-  void unclean_close();
+  void send_disconnection(const std::string& reason);
+
+  void close();
+
+  template <typename T>
+    requires ClientboundPacket<T>
+  void send_packet(T packet) {
+    const auto info = registry_.get_clientbound<T>(state_);
+    if (!info || !info->encoder) {
+      LOG(ERROR) << "Attempted to send unknown packet " << info->packet_id << " for state " << state_;
+      return;
+    }
+
+    send_packet(info->encoder(packet));
+  }
 
  private:
-  boost::asio::io_context& m_context;
+  bool running_{};
   boost::asio::ip::tcp::socket m_socket;
   ByteBuffer m_data_buffer{};
-  BufferReadContext m_read_context{};
-  ConnectionState m_state = ConnectionState::Handshaking;
+  ConnectionState state_ = ConnectionState::kHandshaking;
   std::map<std::string, boost::any> m_context_map;
-  int64_t m_last_keep_alive_payload{};
-  std::unique_ptr<BasicTimer> m_timer{};
-  bool m_compress_packets{};
-  bool m_encrypt_packets{};
+  Scheduler scheduler_;
   std::unique_ptr<BufferCrypter> m_buffer_crypter{};
   std::shared_ptr<uuids::uuid> m_unique_id{};
   std::vector<KnownPack> m_known_packs{};
+  std::function<void(Connection*)> disconnect_callback_;
+  boost::asio::strand<boost::asio::any_io_executor> incoming_packet_strand_;
+  PacketRegistry registry_{};
+
+  void do_read();
+  std::optional<ByteBuffer> try_pop_packet();
+  void process_buffer();
+  void send_packet(ByteBuffer payload_buffer);
 };
 }  // namespace celerity::net
 

@@ -13,8 +13,7 @@
 namespace celerity::nbt::tag {
 class TagIntArray final : public Tag {
  public:
-  explicit TagIntArray(std::vector<int32_t> data)
-      : Tag(TagType::IntArray), m_data(std::move(data)) {}
+  explicit TagIntArray(std::vector<int32_t> data) : Tag(TagType::IntArray), m_data(std::move(data)) {}
   [[nodiscard]] std::vector<int32_t> get_ints() const { return m_data; }
 
  private:
