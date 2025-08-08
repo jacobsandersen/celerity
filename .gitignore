@@ -54,7 +54,7 @@ cmake-build-*/
 *.iws
 
 # IntelliJ
-out/
+src/net/configuration/clientbound/
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/

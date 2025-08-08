@@ -7,6 +7,8 @@
 #include <utility>
 
 #include "../BufferCrypter.h"
+#include "configuration/clientbound/DisconnectPacket.h"
+#include "login/clientbound/LoginDisconnectPacket.h"
 #include "src/BufferCompressor.h"
 #include "src/MinecraftServer.h"
 #include "src/VarInt.h"
@@ -28,9 +30,7 @@ void Connection::do_read() {
                                                                         const std::size_t bytes_read) mutable {
                              if (err) {
                                LOG(ERROR) << "Failed to read socket: " + err.message();
-                               m_socket.shutdown(boost::asio::socket_base::shutdown_both);
-                               m_socket.close();
-                               disconnect_callback_(this);
+                               this->close();
                                return;
                              }
 
@@ -93,46 +93,36 @@ void Connection::process_buffer() {
   }
 }
 
-template <typename T>
-  requires ClientboundPacket<T>
-void Connection::send_packet(T packet) {
-  const auto info = registry_.get_clientbound<T>(state_);
-  if (!info || !info->encoder) {
-    LOG(ERROR) << "Attempted to send unknown packet " << info->packet_id << " for state " << state_;
-    return;
-  }
-
-  ByteBuffer payloadBuffer = info->encoder->encode(packet);
-
+void Connection::send_packet(ByteBuffer payload_buffer) {
   bool should_compress = false;
   if (is_compression_enabled()) {
     const auto threshold =
         MinecraftServer::get_server()->get_config_manager().get_server_config().get_compression_threshold();
 
-    should_compress = payloadBuffer.get_data_length() > threshold;
+    should_compress = payload_buffer.get_data_length() > threshold;
   }
 
-  const int32_t data_length = should_compress ? static_cast<int32_t>(payloadBuffer.get_data_length()) : 0;
+  const int32_t data_length = should_compress ? static_cast<int32_t>(payload_buffer.get_data_length()) : 0;
   if (should_compress) {
-    payloadBuffer = BufferCompressor::compress(payloadBuffer, ZLIB);
+    payload_buffer = BufferCompressor::compress(payload_buffer, ZLIB);
   }
 
   ByteBuffer wrapperBuffer;
   wrapperBuffer.write_varint(
-      static_cast<int32_t>(VarInt::encoding_length(data_length) + payloadBuffer.get_data_length()));
+      static_cast<int32_t>(VarInt::encoding_length(data_length) + payload_buffer.get_data_length()));
   wrapperBuffer.write_varint(data_length);
-  wrapperBuffer.write_ubytes(payloadBuffer.get_bytes());
+  wrapperBuffer.write_ubytes(payload_buffer.get_bytes());
 
   if (is_encryption_enabled()) {
     wrapperBuffer = get_buffer_crypter().encrypt(wrapperBuffer);
   }
 
   boost::asio::async_write(m_socket, boost::asio::buffer(wrapperBuffer.get_bytes()), boost::asio::transfer_all(),
-                           [packet](const boost::system::error_code& err, std::size_t bytes_transferred) {
+                           [this](const boost::system::error_code& err, const std::size_t bytes_transferred) {
                              if (err) {
-                               LOG(ERROR) << "Failed to write " << packet.type() << ": " << err.message();
+                               LOG(ERROR) << "Failed to write packet: " << err.message();
                              } else {
-                               LOG(INFO) << "Wrote " << packet.type() << ": " << bytes_transferred << " bytes written";
+                               LOG(INFO) << "Wrote packet: " << bytes_transferred << " bytes written";
                              }
                            });
 }
@@ -156,15 +146,6 @@ ConnectionState Connection::get_state() const { return state_; }
 const std::shared_ptr<uuids::uuid>& Connection::get_unique_id() const { return m_unique_id; }
 
 void Connection::set_unique_id(const std::shared_ptr<uuids::uuid>& unique_id) { m_unique_id = unique_id; }
-
-void Connection::start_new_timer(const std::chrono::seconds timeout, const std::function<void()>& callback) {
-  if (m_timer != nullptr) {
-    m_timer->cancel();
-  }
-
-  m_timer = std::make_unique<BasicTimer>(m_socket.get_executor());
-  m_timer->start(timeout, callback);
-}
 
 int64_t Connection::get_keep_alive_payload() const {
   const auto keep_alive = get_context_value("keep_alive");
@@ -226,5 +207,29 @@ void Connection::set_known_packs(std::vector<KnownPack> known_packs) { m_known_p
 
 std::vector<KnownPack> Connection::get_known_packs() const { return m_known_packs; }
 
-void Connection::unclean_close() { m_socket.close(); }
+void Connection::send_disconnection(const std::string& reason) {
+  switch (state_) {
+    case ConnectionState::kLogin:
+      this->send_packet(login::client::LoginDisconnectPacket(reason));
+      break;
+    case ConnectionState::kConfiguration:
+      this->send_packet(configuration::client::DisconnectPacket(reason));
+      break;
+    case ConnectionState::kPlay:
+      LOG(INFO) << "send_disconnection called in Play state; no Disconnection packet defined";
+      break;
+    case ConnectionState::kHandshaking:
+    case ConnectionState::kStatus:
+      // Nothing to do here. We'll just close the connection.
+      break;
+  }
+
+  this->close();
+}
+
+void Connection::close() {
+  disconnect_callback_(this);
+  m_socket.shutdown(boost::asio::socket_base::shutdown_both);
+  m_socket.close();
+}
 }  // namespace celerity::net

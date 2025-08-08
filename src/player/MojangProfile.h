@@ -20,8 +20,8 @@ struct MojangProfileProperty {
 
 class MojangProfile {
  public:
-  MojangProfile(uuids::uuid unique_id, std::string name, std::vector<MojangProfileProperty> properties)
-      : m_unique_id(unique_id), m_name(std::move(name)), m_properties(std::move(properties)) {}
+  MojangProfile(const uuids::uuid unique_id, std::string name, std::vector<MojangProfileProperty> properties)
+      : unique_id_(unique_id), name_(std::move(name)), properties_(std::move(properties)) {}
 
   [[nodiscard]] const uuids::uuid &get_unique_id() const;
 
@@ -30,9 +30,9 @@ class MojangProfile {
   [[nodiscard]] const std::vector<MojangProfileProperty> &get_properties() const;
 
  private:
-  uuids::uuid m_unique_id{};
-  std::string m_name;
-  std::vector<MojangProfileProperty> m_properties;
+  uuids::uuid unique_id_{};
+  std::string name_;
+  std::vector<MojangProfileProperty> properties_;
 };
 }  // namespace celerity::player
 #endif

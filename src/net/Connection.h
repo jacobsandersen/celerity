@@ -1,26 +1,30 @@
 #ifndef CELERITY_NET_CONNECTION_H
 #define CELERITY_NET_CONNECTION_H
 
+#include <absl/log/log.h>
 #include <cryptopp/modes.h>
 #include <uuid.h>
 
 #include <boost/any.hpp>
 #include <boost/asio.hpp>
 
-#include "../BasicTimer.h"
 #include "../BufferCrypter.h"
 #include "../ByteBuffer.h"
 #include "../KnownPack.h"
 #include "ConnectionState.h"
 #include "PacketRegistry.h"
+#include "src/Scheduler.h"
 
 namespace celerity::net {
 class Connection : std::enable_shared_from_this<Connection> {
  public:
   explicit Connection(boost::asio::ip::tcp::socket socket, std::function<void(Connection*)> disconnect_callback)
       : m_socket(std::move(socket)),
+        scheduler_(m_socket.get_executor()),
         disconnect_callback_(std::move(disconnect_callback)),
         incoming_packet_strand_(m_socket.get_executor()) {}
+
+  ~Connection() { scheduler_.cancel_all(); }
 
   void start();
 
@@ -32,6 +36,8 @@ class Connection : std::enable_shared_from_this<Connection> {
 
   [[nodiscard]] bool has_context_value(const std::string& key) const;
 
+  [[nodiscard]] Scheduler& get_scheduler() { return scheduler_; }
+
   void set_state(ConnectionState state);
 
   [[nodiscard]] ConnectionState get_state() const;
@@ -39,8 +45,6 @@ class Connection : std::enable_shared_from_this<Connection> {
   [[nodiscard]] const std::shared_ptr<uuids::uuid>& get_unique_id() const;
 
   void set_unique_id(const std::shared_ptr<uuids::uuid>& unique_id);
-
-  void start_new_timer(std::chrono::seconds timeout, const std::function<void()>& callback);
 
   [[nodiscard]] int64_t get_keep_alive_payload() const;
 
@@ -58,11 +62,21 @@ class Connection : std::enable_shared_from_this<Connection> {
 
   std::vector<KnownPack> get_known_packs() const;
 
-  void unclean_close();
+  void send_disconnection(const std::string& reason);
+
+  void close();
 
   template <typename T>
     requires ClientboundPacket<T>
-  void send_packet(T packet);
+  void send_packet(T packet) {
+    const auto info = registry_.get_clientbound<T>(state_);
+    if (!info || !info->encoder) {
+      LOG(ERROR) << "Attempted to send unknown packet " << info->packet_id << " for state " << state_;
+      return;
+    }
+
+    send_packet(info->encoder(packet));
+  }
 
  private:
   bool running_{};
@@ -70,7 +84,7 @@ class Connection : std::enable_shared_from_this<Connection> {
   ByteBuffer m_data_buffer{};
   ConnectionState state_ = ConnectionState::kHandshaking;
   std::map<std::string, boost::any> m_context_map;
-  std::unique_ptr<BasicTimer> m_timer{};
+  Scheduler scheduler_;
   std::unique_ptr<BufferCrypter> m_buffer_crypter{};
   std::shared_ptr<uuids::uuid> m_unique_id{};
   std::vector<KnownPack> m_known_packs{};
@@ -81,6 +95,7 @@ class Connection : std::enable_shared_from_this<Connection> {
   void do_read();
   std::optional<ByteBuffer> try_pop_packet();
   void process_buffer();
+  void send_packet(ByteBuffer payload_buffer);
 };
 }  // namespace celerity::net
 

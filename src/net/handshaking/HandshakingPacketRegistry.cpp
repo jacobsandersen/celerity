@@ -4,7 +4,7 @@
 
 #include "HandshakingPacketRegistry.h"
 
-#include "IntentionPacket.h"
+#include "serverbound/IntentionPacket.h"
 
 namespace celerity::net::handshaking {
 template <typename T>
@@ -14,6 +14,6 @@ void register_serverbound(PacketRegistry& registry) {
 }
 
 void HandshakingPacketRegistry::register_all(PacketRegistry& registry) {
-  register_serverbound<IntentionPacket>(registry);
+  register_serverbound<server::IntentionPacket>(registry);
 }
 }  // namespace celerity::net::handshaking

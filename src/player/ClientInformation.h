@@ -2,51 +2,61 @@
 #define CELERITY_PLAYER_CLIENTINFORMATION_H
 
 #include <string>
+#include <utility>
 
 namespace celerity::player {
-class ClientInformation {
- public:
-  [[nodiscard]] const std::string &get_locale() const;
+enum class ChatMode { Enabled, CommandsOnly, Hidden };
 
-  void set_locale(const std::string &locale);
+struct DisplayedSkinParts {
+  bool cape{};
+  bool jacket{};
+  bool left_sleeve{};
+  bool right_sleeve{};
+  bool left_pants_leg{};
+  bool right_pants_leg{};
+  bool hat{};
 
-  [[nodiscard]] int8_t get_view_distance() const;
+  explicit DisplayedSkinParts(const uint8_t bitmask) {
+    cape = bitmask & 1;
+    jacket = bitmask & (1 << 1);
+    left_sleeve = bitmask & (1 << 2);
+    right_sleeve = bitmask & (1 << 3);
+    left_pants_leg = bitmask & (1 << 4);
+    right_pants_leg = bitmask & (1 << 5);
+    hat = bitmask & (1 << 6);
+  }
+};
 
-  void set_view_distance(int8_t view_distance);
+enum class MainHand { Left, Right };
 
-  [[nodiscard]] int32_t get_chat_mode() const;
+enum class ParticleStatus { All, Decreased, Minimal };
 
-  void set_chat_mode(int32_t chat_mode);
+struct ClientInformation {
+  std::string locale_{};
+  int8_t view_distance_{};
+  ChatMode chat_mode_{};
+  bool chat_colors_enabled_{};
+  DisplayedSkinParts displayed_skin_parts_{0};
+  MainHand main_hand_{};
+  bool enable_text_filtering_{};
+  bool allow_server_listings_{};
+  ParticleStatus particle_status_{};
 
-  [[nodiscard]] bool are_chat_colors_enabled() const;
+  ClientInformation(std::string locale, const int8_t view_distance, const ChatMode chat_mode,
+                    const bool chat_colors_enabled, const DisplayedSkinParts& displayed_skin_parts,
+                    const MainHand main_hand, const bool enable_text_filtering, const bool allow_server_listings,
+                    const ParticleStatus particle_status)
+      : locale_(std::move(locale)),
+        view_distance_(view_distance),
+        chat_mode_(chat_mode),
+        chat_colors_enabled_(chat_colors_enabled),
+        displayed_skin_parts_(displayed_skin_parts),
+        main_hand_(main_hand),
+        enable_text_filtering_(enable_text_filtering),
+        allow_server_listings_(allow_server_listings),
+        particle_status_(particle_status) {}
 
-  void set_chat_colors_enabled(bool chat_colors_enabled);
-
-  [[nodiscard]] uint8_t get_displayed_skin_parts() const;
-
-  void set_displayed_skin_parts(uint8_t displayed_skin_parts);
-
-  [[nodiscard]] int32_t get_main_hand() const;
-
-  void set_main_hand(int32_t main_hand);
-
-  [[nodiscard]] bool is_text_filtering_enabled() const;
-
-  void set_text_filtering_enabled(bool enable_text_filtering);
-
-  [[nodiscard]] bool does_allow_server_listings() const;
-
-  void set_allow_server_listings(bool allow_server_listings);
-
- private:
-  std::string m_locale{};
-  int8_t m_view_distance{};
-  int32_t m_chat_mode{};
-  bool m_chat_colors_enabled{};
-  uint8_t m_displayed_skin_parts{};
-  int32_t m_main_hand{};
-  bool m_enable_text_filtering{};
-  bool m_allow_server_listings{};
+  ClientInformation(const ClientInformation& other) = default;
 };
 }  // namespace celerity::player
 
