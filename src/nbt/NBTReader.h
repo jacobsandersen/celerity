@@ -18,6 +18,7 @@ class NBTReader {
   explicit NBTReader(ByteBuffer& buffer) : buffer_(buffer) {}
   tag::NamedTag read_tag();
   std::unique_ptr<tag::Tag> read_network_tag();
+
  private:
   std::unique_ptr<tag::Tag> read_payload(const tag::TagType& type);
 };

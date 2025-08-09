@@ -18,6 +18,7 @@ void PongPacket::handle(const PongPacket& packet, Connection& connection) {
     if (packet.id_ != boost::any_cast<int32_t>(*maybe_last_id)) {
       connection.send_disconnection("Pong ID did not match my Ping ID");
     }
-  } catch (boost::bad_any_cast&) {}
+  } catch (boost::bad_any_cast&) {
+  }
 }
 }  // namespace celerity::net::configuration::server

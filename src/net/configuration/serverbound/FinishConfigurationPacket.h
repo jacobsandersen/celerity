@@ -16,4 +16,4 @@ struct FinishConfigurationPacket final : Packet {
 
 }  // namespace celerity::net::configuration::server
 
-#endif //CELERITY_NET_CONFIGURATION_SERVERBOUND_FINISHCONFIGURATIONPACKET_H
+#endif  // CELERITY_NET_CONFIGURATION_SERVERBOUND_FINISHCONFIGURATIONPACKET_H

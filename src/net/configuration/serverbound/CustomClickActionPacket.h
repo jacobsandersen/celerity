@@ -23,4 +23,4 @@ struct CustomClickActionPacket final : Packet {
 };
 }  // namespace celerity::net::configuration::server
 
-#endif //CUSTOMCLICKACTIONPACKET_H
+#endif  // CUSTOMCLICKACTIONPACKET_H

@@ -41,9 +41,7 @@ tag::NamedTag NBTReader::read_tag() {  // NOLINT(*-no-recursion)
   return {name, read_payload(type)};
 }
 
-std::unique_ptr<tag::Tag> NBTReader::read_network_tag() {
-  return read_payload(buffer_.read_nbt_tag_type());
-}
+std::unique_ptr<tag::Tag> NBTReader::read_network_tag() { return read_payload(buffer_.read_nbt_tag_type()); }
 
 std::unique_ptr<tag::Tag> NBTReader::read_payload(const tag::TagType& type) {  // NOLINT(*-no-recursion)
   switch (type.get_type_id()) {

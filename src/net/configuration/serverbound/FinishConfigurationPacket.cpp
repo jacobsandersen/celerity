@@ -9,7 +9,8 @@
 #include "src/net/Connection.h"
 
 namespace celerity::net::configuration::server {
-void FinishConfigurationPacket::handle([[maybe_unused]] const FinishConfigurationPacket& packet, Connection& connection) {
+void FinishConfigurationPacket::handle([[maybe_unused]] const FinishConfigurationPacket& packet,
+                                       Connection& connection) {
   LOG(INFO) << "Client acknowledges finish configuration, switching to Play";
   connection.set_state(ConnectionState::kPlay);
 }

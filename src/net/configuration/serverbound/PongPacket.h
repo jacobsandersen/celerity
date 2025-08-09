@@ -18,4 +18,4 @@ struct PongPacket final : Packet {
 
 }  // namespace celerity::net::configuration::server
 
-#endif //PONGPACKET_H
+#endif  // PONGPACKET_H
