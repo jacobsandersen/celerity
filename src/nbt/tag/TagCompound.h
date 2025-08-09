@@ -5,6 +5,9 @@
 #ifndef CELERITY_NBT_TAG_TAGCOMPOUND_H
 #define CELERITY_NBT_TAG_TAGCOMPOUND_H
 
+#include <vector>
+
+#include "NamedTag.h"
 #include "Tag.h"
 
 namespace celerity::nbt::tag {

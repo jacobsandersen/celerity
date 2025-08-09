@@ -7,6 +7,7 @@
 
 #include <unicode/unistr.h>
 
+#include <memory>
 #include <utility>
 
 #include "Tag.h"
@@ -19,8 +20,8 @@ class NamedTag {
  public:
   NamedTag(icu::UnicodeString name, std::unique_ptr<Tag> tag) : name_(std::move(name)), tag_(std::move(tag)) {}
 
-  [[nodiscard]] icu::UnicodeString get_name() { return name_; }
-  [[nodiscard]] std::unique_ptr<Tag>& get_tag() { return tag_; }
+  [[nodiscard]] icu::UnicodeString get_name() const { return name_; }
+  [[nodiscard]] const std::unique_ptr<Tag>& get_tag() const { return tag_; }
 };
 }  // namespace celerity::nbt::tag
 

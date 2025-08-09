@@ -57,14 +57,25 @@ target_sources(celerity PRIVATE
         src/net/login/serverbound/KeyPacket.cpp
         src/net/login/serverbound/LoginAcknowledgedPacket.cpp
         src/net/configuration/ConfigurationPacketRegistry.cpp
+        src/net/configuration/clientbound/ClearDialogPacket.cpp
         src/net/configuration/clientbound/CookieRequestPacket.cpp
         src/net/configuration/clientbound/CustomPayloadPacket.cpp
+        src/net/configuration/clientbound/CustomReportDetailsPacket.cpp
         src/net/configuration/clientbound/DisconnectPacket.cpp
         src/net/configuration/clientbound/FinishConfigurationPacket.cpp
         src/net/configuration/clientbound/KeepAlivePacket.cpp
         src/net/configuration/clientbound/PingPacket.cpp
+        src/net/configuration/clientbound/RegistryDataPacket.cpp
+        src/net/configuration/clientbound/ResetChatPacket.cpp
+        src/net/configuration/clientbound/ResourcePackPopPacket.cpp
+        src/net/configuration/clientbound/ResourcePackPushPacket.cpp
         src/net/configuration/clientbound/SelectKnownPacksPacket.cpp
+        src/net/configuration/clientbound/ServerLinksPacket.cpp
+        src/net/configuration/clientbound/ShowDialogPacket.cpp
+        src/net/configuration/clientbound/StoreCookiePacket.cpp
+        src/net/configuration/clientbound/TransferPacket.cpp
         src/net/configuration/clientbound/UpdateEnabledFeaturesPacket.cpp
+        src/net/configuration/clientbound/UpdateTagsPacket.cpp
         src/net/configuration/serverbound/ClientInformationPacket.cpp
         src/net/configuration/serverbound/CustomPayloadPacket.cpp
         src/net/configuration/serverbound/KeepAlivePacket.cpp

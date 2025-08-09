@@ -4,14 +4,25 @@
 
 #include "ConfigurationPacketRegistry.h"
 
+#include "clientbound/ClearDialogPacket.h"
 #include "clientbound/CookieRequestPacket.h"
 #include "clientbound/CustomPayloadPacket.h"
+#include "clientbound/CustomReportDetailsPacket.h"
 #include "clientbound/DisconnectPacket.h"
 #include "clientbound/FinishConfigurationPacket.h"
 #include "clientbound/KeepAlivePacket.h"
 #include "clientbound/PingPacket.h"
+#include "clientbound/RegistryDataPacket.h"
+#include "clientbound/ResetChatPacket.h"
+#include "clientbound/ResourcePackPopPacket.h"
+#include "clientbound/ResourcePackPushPacket.h"
 #include "clientbound/SelectKnownPacksPacket.h"
+#include "clientbound/ServerLinksPacket.h"
+#include "clientbound/ShowDialogPacket.h"
+#include "clientbound/StoreCookiePacket.h"
+#include "clientbound/TransferPacket.h"
 #include "clientbound/UpdateEnabledFeaturesPacket.h"
+#include "clientbound/UpdateTagsPacket.h"
 #include "serverbound/ClientInformationPacket.h"
 #include "serverbound/CustomPayloadPacket.h"
 #include "serverbound/KeepAlivePacket.h"
@@ -37,19 +48,19 @@ void ConfigurationPacketRegistry::register_all(PacketRegistry& registry) {
   register_clientbound<client::FinishConfigurationPacket>(registry);
   register_clientbound<client::KeepAlivePacket>(registry);
   register_clientbound<client::PingPacket>(registry);
-  // reset chat
-  // registry data
-  // remove resource pack
-  // add resource pack
-  // store cookie
-  // transfer
+  register_clientbound<client::ResetChatPacket>(registry);
+  register_clientbound<client::RegistryDataPacket>(registry);
+  register_clientbound<client::ResourcePackPopPacket>(registry);
+  register_clientbound<client::ResourcePackPushPacket>(registry);
+  register_clientbound<client::StoreCookiePacket>(registry);
+  register_clientbound<client::TransferPacket>(registry);
   register_clientbound<client::UpdateEnabledFeaturesPacket>(registry);
-  // update tags
+  register_clientbound<client::UpdateTagsPacket>(registry);
   register_clientbound<client::SelectKnownPacksPacket>(registry);
-  // custom report details
-  // server links
-  // clear dialog
-  // show dialog
+  register_clientbound<client::CustomReportDetailsPacket>(registry);
+  register_clientbound<client::ServerLinksPacket>(registry);
+  register_clientbound<client::ClearDialogPacket>(registry);
+  register_clientbound<client::ShowDialogPacket>(registry);
 
   register_serverbound<server::ClientInformationPacket>(registry);
   // cookie response

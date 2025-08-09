@@ -1,7 +1,7 @@
-#include <iostream>
-
-#include <absl/log/initialize.h>
 #include <absl/log/globals.h>
+#include <absl/log/initialize.h>
+
+#include <iostream>
 
 #include "MinecraftServer.h"
 #include "nbt/NBTWriter.h"

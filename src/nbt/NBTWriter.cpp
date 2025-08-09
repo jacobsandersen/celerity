@@ -4,8 +4,6 @@
 
 #include "NBTWriter.h"
 
-#include <assert.h>
-
 #include "Concepts.h"
 #include "tag/TagByte.h"
 #include "tag/TagByteArray.h"
@@ -21,20 +19,34 @@
 #include "tag/TagString.h"
 
 namespace celerity::nbt {
-void NBTWriter::write_tag(tag::NamedTag& tag) {  // NOLINT(*-no-recursion)
-  const auto type = tag.get_tag()->get_type();
+void NBTWriter::write_tag(const tag::NamedTag& tag) const {  // NOLINT(*-no-recursion)
+  write_tag(tag.get_name(), tag.get_tag());
+}
+
+void NBTWriter::write_tag(const std::unique_ptr<tag::Tag>& tag) const {
+  icu::UnicodeString bogus;
+  bogus.setToBogus();
+
+  write_tag(bogus, tag);
+}
+
+void NBTWriter::write_tag(const icu::UnicodeString& name,
+                          const std::unique_ptr<tag::Tag>& tag) const {  // NOLINT(*-no-recursion)
+  if (tag == nullptr) return;
+
+  const auto type = tag->get_type();
   if (type == tag::TagType::End) {
     throw std::runtime_error("Cannot write a top-level Tag_END");
   }
 
   buffer_.write_ubyte(type.get_type_id());
-  buffer_.write_string_modified_utf8(tag.get_name());
-  write_payload(tag.get_tag());
+  if (!name.isBogus()) buffer_.write_string_modified_utf8(name);
+  write_payload(tag);
 }
 
 template <typename T>
   requires DerivedTag<T>
-T* downcast(std::unique_ptr<tag::Tag>& base_tag) {
+T* downcast(const std::unique_ptr<tag::Tag>& base_tag) {
   auto* downcasted = dynamic_cast<T*>(base_tag.get());
   if (downcasted == nullptr) {
     throw std::runtime_error(
@@ -45,7 +57,7 @@ T* downcast(std::unique_ptr<tag::Tag>& base_tag) {
   return downcasted;
 }
 
-void NBTWriter::write_payload(std::unique_ptr<tag::Tag>& tag) {  // NOLINT(*-no-recursion)
+void NBTWriter::write_payload(const std::unique_ptr<tag::Tag>& tag) const {  // NOLINT(*-no-recursion)
   switch (tag->get_type().get_type_id()) {
     // End
     case 0: {
@@ -99,7 +111,7 @@ void NBTWriter::write_payload(std::unique_ptr<tag::Tag>& tag) {  // NOLINT(*-no-
     // List
     case 9: {
       const auto list_tag = downcast<tag::TagList>(tag);
-      auto& items = list_tag->get_items();
+      const auto& items = list_tag->get_items();
       buffer_.write_ubyte(list_tag->get_child_type().get_type_id());
       buffer_.write_be_int(static_cast<int32_t>(items.size()));
       for (auto& item : items) {
@@ -109,7 +121,7 @@ void NBTWriter::write_payload(std::unique_ptr<tag::Tag>& tag) {  // NOLINT(*-no-
     }
     // Compound
     case 10: {
-      for (auto& tags = downcast<tag::TagCompound>(tag)->get_tags(); auto& named_tag : tags) {
+      for (const auto& tags = downcast<tag::TagCompound>(tag)->get_tags(); auto& named_tag : tags) {
         write_tag(named_tag);
       }
       buffer_.write_ubyte(0);  // Tag End

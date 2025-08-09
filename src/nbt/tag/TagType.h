@@ -1,6 +1,7 @@
 #ifndef CELERITY_NBT_TAG_TAGTYPE_H
 #define CELERITY_NBT_TAG_TAGTYPE_H
 
+#include <string>
 #include <utility>
 
 namespace celerity::nbt::tag {
