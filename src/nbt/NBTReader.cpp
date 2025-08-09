@@ -28,7 +28,7 @@ std::unique_ptr<TagT> read_tag_array(ByteBuffer& buffer, const std::function<T(B
   return std::make_unique<TagT>(items);
 }
 
-tag::NamedTag NBTReader::read_tag(const int depth) {  // NOLINT(*-no-recursion)
+tag::NamedTag NBTReader::read_tag() {  // NOLINT(*-no-recursion)
   const tag::TagType type = buffer_.read_nbt_tag_type();
 
   icu::UnicodeString name;
@@ -38,18 +38,17 @@ tag::NamedTag NBTReader::read_tag(const int depth) {  // NOLINT(*-no-recursion)
     name = "";
   }
 
-  return {name, read_payload(type, depth)};
+  return {name, read_payload(type)};
 }
 
-std::unique_ptr<tag::Tag> NBTReader::read_payload(  // NOLINT(*-no-recursion)
-    const tag::TagType& type, const int depth) {
+std::unique_ptr<tag::Tag> NBTReader::read_network_tag() {
+  return read_payload(buffer_.read_nbt_tag_type());
+}
+
+std::unique_ptr<tag::Tag> NBTReader::read_payload(const tag::TagType& type) {  // NOLINT(*-no-recursion)
   switch (type.get_type_id()) {
     // End
     case 0: {
-      if (depth == 0) {
-        throw std::domain_error("Read a TAG_End outside of a TAG_Compound or TAG_List");
-      }
-
       return std::make_unique<tag::TagEnd>();
     }
     // Byte
@@ -94,7 +93,7 @@ std::unique_ptr<tag::Tag> NBTReader::read_payload(  // NOLINT(*-no-recursion)
 
       auto list = std::make_unique<tag::TagList>(inner_type);
       for (int i = 0; i < length; i++) {
-        list->add(read_payload(inner_type, depth + 1));
+        list->add(read_payload(inner_type));
       }
 
       return list;
@@ -103,7 +102,7 @@ std::unique_ptr<tag::Tag> NBTReader::read_payload(  // NOLINT(*-no-recursion)
     case 10: {
       auto compound = std::make_unique<tag::TagCompound>();
       while (true) {
-        tag::NamedTag named_tag = read_tag(depth + 1);
+        tag::NamedTag named_tag = read_tag();
         if (named_tag.get_tag()->get_type() == tag::TagType::End) break;
         compound->add(std::move(named_tag));
       }

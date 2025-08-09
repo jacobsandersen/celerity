@@ -24,8 +24,13 @@
 #include "clientbound/UpdateEnabledFeaturesPacket.h"
 #include "clientbound/UpdateTagsPacket.h"
 #include "serverbound/ClientInformationPacket.h"
+#include "serverbound/CookieResponsePacket.h"
+#include "serverbound/CustomClickActionPacket.h"
 #include "serverbound/CustomPayloadPacket.h"
+#include "serverbound/FinishConfigurationPacket.h"
 #include "serverbound/KeepAlivePacket.h"
+#include "serverbound/PongPacket.h"
+#include "serverbound/ResourcePackPacket.h"
 #include "serverbound/SelectKnownPacksPacket.h"
 
 namespace celerity::net::configuration {
@@ -63,13 +68,13 @@ void ConfigurationPacketRegistry::register_all(PacketRegistry& registry) {
   register_clientbound<client::ShowDialogPacket>(registry);
 
   register_serverbound<server::ClientInformationPacket>(registry);
-  // cookie response
+  register_serverbound<server::CookieResponsePacket>(registry);
   register_serverbound<server::CustomPayloadPacket>(registry);
-  // ack finish config
+  register_serverbound<server::FinishConfigurationPacket>(registry);
   register_serverbound<server::KeepAlivePacket>(registry);
-  // pong
-  // resource pack response
+  register_serverbound<server::PongPacket>(registry);
+  register_serverbound<server::ResourcePackPacket>(registry);
   register_serverbound<server::SelectKnownPacksPacket>(registry);
-  // custom click action
+  register_serverbound<server::CustomClickActionPacket>(registry);
 }
 }  // namespace celerity::net::configuration

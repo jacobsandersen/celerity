@@ -77,8 +77,13 @@ target_sources(celerity PRIVATE
         src/net/configuration/clientbound/UpdateEnabledFeaturesPacket.cpp
         src/net/configuration/clientbound/UpdateTagsPacket.cpp
         src/net/configuration/serverbound/ClientInformationPacket.cpp
+        src/net/configuration/serverbound/CookieResponsePacket.cpp
+        src/net/configuration/serverbound/CustomClickActionPacket.cpp
         src/net/configuration/serverbound/CustomPayloadPacket.cpp
+        src/net/configuration/serverbound/FinishConfigurationPacket.cpp
         src/net/configuration/serverbound/KeepAlivePacket.cpp
+        src/net/configuration/serverbound/PongPacket.cpp
+        src/net/configuration/serverbound/ResourcePackPacket.cpp
         src/net/configuration/serverbound/SelectKnownPacksPacket.cpp
         src/nbt/NBTWriter.cpp
         src/nbt/NBTReader.cpp
