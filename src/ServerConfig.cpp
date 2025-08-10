@@ -7,9 +7,7 @@
 constexpr uint16_t kDefaultServerPort = 25565;
 constexpr uint16_t kDefaultCompressionThreshold = 256;
 
-uint16_t ServerConfig::get_server_port() const {
-  return toml::find_or<uint16_t>(toml_, "port", kDefaultServerPort);
-}
+uint16_t ServerConfig::get_server_port() const { return toml::find_or<uint16_t>(toml_, "port", kDefaultServerPort); }
 
 uint16_t ServerConfig::get_compression_threshold() const {
   return toml::find_or<uint16_t>(toml_, "compression_threshold", kDefaultCompressionThreshold);

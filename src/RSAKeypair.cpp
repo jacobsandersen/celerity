@@ -27,16 +27,8 @@ std::vector<uint8_t> RSAKeypair::decrypt(const std::vector<uint8_t> &encrypted) 
   CryptoPP::AutoSeededRandomPool rng;
 
   CryptoPP::ArraySink sink(decrypted.data(), decrypted.size());
-  CryptoPP::ArraySource source(
-    encrypted.data(),
-    encrypted.size(),
-    true,
-    new CryptoPP::PK_DecryptorFilter(
-      rng,
-      decryptor,
-      new CryptoPP::Redirector(sink)
-    )
-  );
+  CryptoPP::ArraySource source(encrypted.data(), encrypted.size(), true,
+                               new CryptoPP::PK_DecryptorFilter(rng, decryptor, new CryptoPP::Redirector(sink)));
 
   decrypted.resize(sink.TotalPutLength());
 

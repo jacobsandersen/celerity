@@ -169,7 +169,5 @@ uuids::uuid OwnerTrackingSchedulerProxy::schedule_async_repeating_task(const std
                                                                        std::optional<uuids::uuid>) {
   return scheduler_->schedule_async_repeating_task(delay, interval, std::move(task), {id_});
 }
-void OwnerTrackingSchedulerProxy::cancel(const uuids::uuid id) {
-  return scheduler_->cancel(id);
-}
+void OwnerTrackingSchedulerProxy::cancel(const uuids::uuid id) { return scheduler_->cancel(id); }
 }  // namespace celerity

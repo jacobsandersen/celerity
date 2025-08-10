@@ -10,9 +10,11 @@
 namespace celerity::net {
 using namespace boost::asio::ip;
 
-NetworkManager::NetworkManager(boost::asio::io_context& io_context, std::shared_ptr<Scheduler>& scheduler, const ServerConfig& config)
-    : io_context_(io_context), scheduler_(scheduler), acceptor_(tcp::acceptor(io_context_,
-                                               tcp::endpoint(tcp::v4(), config.get_server_port()))) {
+NetworkManager::NetworkManager(boost::asio::io_context& io_context, std::shared_ptr<Scheduler>& scheduler,
+                               const ServerConfig& config)
+    : io_context_(io_context),
+      scheduler_(scheduler),
+      acceptor_(tcp::acceptor(io_context_, tcp::endpoint(tcp::v4(), config.get_server_port()))) {
   LOG(INFO) << "Accepting connections on " << acceptor_.local_endpoint();
 }
 
@@ -27,13 +29,14 @@ void NetworkManager::start() {
     } else {
       LOG(INFO) << "Connection established from " << sock.remote_endpoint().address();
 
-      const auto conn = std::make_shared<Connection>(std::move(sock), scheduler_, [this](const std::shared_ptr<Connection>& c) {
-        if (c == nullptr) return;
-        MinecraftServer::get_server().remove_player(c->get_unique_id());
-        if (const auto it = std::ranges::find(connections_, c); it != connections_.end()) {
-          connections_.erase(it);
-        }
-      });
+      const auto conn =
+          std::make_shared<Connection>(std::move(sock), scheduler_, [this](const std::shared_ptr<Connection>& c) {
+            if (c == nullptr) return;
+            MinecraftServer::get_server().remove_player(c->get_unique_id());
+            if (const auto it = std::ranges::find(connections_, c); it != connections_.end()) {
+              connections_.erase(it);
+            }
+          });
 
       connections_.push_back(conn);
 

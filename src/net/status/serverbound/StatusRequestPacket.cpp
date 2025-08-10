@@ -16,7 +16,6 @@ void StatusRequestPacket::handle(const StatusRequestPacket& packet, Connection& 
     return;
   }
 
-
   LOG(INFO) << "saving request";
   connection.set_context_value("status_requested", true);
 

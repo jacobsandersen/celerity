@@ -77,9 +77,7 @@ class PacketRegistry {
   std::unordered_map<ConnectionState, std::vector<ClientboundEntry>> clientbound_{};
   std::unordered_map<std::pair<ConnectionState, std::type_index>, int32_t, util::PairHash> type_to_id_{};
 
-  PacketRegistry() {
-    register_all_packets();
-  }
+  PacketRegistry() { register_all_packets(); }
 
   void register_all_packets() {
     for (const auto& init_function : *get_init_functions()) {

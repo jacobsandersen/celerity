@@ -16,7 +16,8 @@ class NetworkManager {
   std::list<std::shared_ptr<Connection>> connections_;
 
  public:
-  explicit NetworkManager(boost::asio::io_context& io_context, std::shared_ptr<Scheduler>& scheduler, const ServerConfig& config);
+  explicit NetworkManager(boost::asio::io_context& io_context, std::shared_ptr<Scheduler>& scheduler,
+                          const ServerConfig& config);
 
   void start();
   void shutdown();
