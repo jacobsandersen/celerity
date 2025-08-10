@@ -8,98 +8,146 @@
 #include <uuid.h>
 
 #include <boost/asio/steady_timer.hpp>
+#include <unordered_set>
 
 #include "util/UUIDUtil.h"
 
 namespace celerity {
-template <typename T>
-concept ChronoDuration = requires {
-  typename T::rep;
-  typename T::period;
-  requires std::is_arithmetic_v<typename T::rep>;
+struct Task {
+  virtual ~Task() = default;
+  virtual void run() const = 0;
 };
 
-template <ChronoDuration T>
-static std::chrono::seconds as_seconds(T duration) {
-  return std::chrono::duration_cast<std::chrono::seconds>(duration);
-}
+struct BaseScheduler {
+  virtual ~BaseScheduler() = default;
 
-class Scheduler {
+  /**
+   * Schedule an optionally-owned one-shot task that runs as soon as possible
+   * @param task the task to run
+   * @param owner_id an optional owner id
+   * @return the id of the task
+   */
+  virtual uuids::uuid run_async_task(std::unique_ptr<Task> task, const std::optional<uuids::uuid> owner_id = {}) {
+    return schedule_async_task(std::chrono::milliseconds(0), std::move(task), owner_id);
+  }
+
+  /**
+   * Schedule an optionally-owned one-shot task that runs as soon as possible after an initial delay
+   * @param delay the delay before the task runs
+   * @param task the task to run
+   * @param owner_id an optional owner id
+   * @return the id of the task
+   */
+  virtual uuids::uuid schedule_async_task(std::chrono::milliseconds delay, std::unique_ptr<Task> task,
+                                          std::optional<uuids::uuid> owner_id = {}) = 0;
+
+  /**
+   * Schedule an optionally-owned repeating task that runs as soon as possible and repeats at the specified interval
+   * @param interval the interval at which to repeat the task
+   * @param task the task to run
+   * @param owner_id an optional owner id
+   * @return the id of the repeating task
+   */
+  virtual uuids::uuid schedule_async_repeating_task(const std::chrono::milliseconds interval,
+                                                    const std::shared_ptr<Task> task,
+                                                    const std::optional<uuids::uuid> owner_id = {}) {
+    return schedule_async_repeating_task(std::chrono::milliseconds(0), interval, task, owner_id);
+  }
+
+  /**
+   * Schedule an optionally-owned repeating task that runs as soon as possible after an initial delay and repeats at the
+   * specified interval
+   * @param delay the delay before the task runs
+   * @param interval the interval at which to repeat the task after the initial delay
+   * @param task the task to run
+   * @param owner_id an optional owner id
+   * @return the id of the repeating task
+   */
+  virtual uuids::uuid schedule_async_repeating_task(std::chrono::milliseconds delay, std::chrono::milliseconds interval,
+                                                    std::shared_ptr<Task> task,
+                                                    std::optional<uuids::uuid> owner_id = {}) = 0;
+
+  /**
+   * Cancel a single task by its ID
+   * @param id the id of the task to cancel
+   */
+  virtual void cancel(uuids::uuid id) = 0;
+};
+
+class Scheduler final : public BaseScheduler, public std::enable_shared_from_this<Scheduler> {
  public:
-  explicit Scheduler(const boost::asio::any_io_executor& executor) : executor_(executor) {}
+  explicit Scheduler(boost::asio::io_context& context) : executor_(context.get_executor()) {}
 
-  template <ChronoDuration T>
-  uuids::uuid schedule_task(T delay, const std::function<void()>& task) {
-    const auto id = util::UUIDUtil::generate_random_uuid();
-    const auto timer = std::make_shared<boost::asio::steady_timer>(executor_, as_seconds(delay));
+  uuids::uuid schedule_async_task(std::chrono::milliseconds delay, std::unique_ptr<Task> task,
+                                  std::optional<uuids::uuid> owner_id) override;
 
-    std::lock_guard lock(mutex_);
+  uuids::uuid schedule_async_repeating_task(std::chrono::milliseconds delay, std::chrono::milliseconds interval,
+                                            std::shared_ptr<Task> task, std::optional<uuids::uuid> owner_id) override;
 
-    scheduled_tasks_[id] = timer;
+  void cancel(uuids::uuid id) override;
 
-    timer->async_wait([task = task, this, id](const boost::system::error_code& ec) {
-      if (ec == boost::asio::error::operation_aborted) return;
-      task();
-      scheduled_tasks_.erase(id);
-    });
+  /**
+   * Cancels all tasks owned by a particular task owner
+   * This method is no-op if the ID does not refer to a registered owner
+   * @param id the id of the task owner
+   */
+  void cancel_owner(uuids::uuid id);
 
-    return id;
-  }
-
-  template <ChronoDuration T>
-  uuids::uuid schedule_repeating_task(T repeat_every, const std::function<void()> task) {
-    return schedule_repeating_task(0, repeat_every, task);
-  }
-
-  template <ChronoDuration InitialDelayT, ChronoDuration RepeatEveryT>
-  uuids::uuid schedule_repeating_task(InitialDelayT initial_delay, RepeatEveryT repeat_every,
-                                      const std::function<void()>& task) {
-    const auto id = util::UUIDUtil::generate_random_uuid();
-    const auto timer = std::make_shared<boost::asio::steady_timer>(executor_, as_seconds(initial_delay));
-
-    std::lock_guard lock(mutex_);
-
-    scheduled_tasks_[id] = timer;
-
-    auto repeating_task = std::make_shared<std::function<void()>>();
-    auto inner_handler = [this, id, repeating_task](const boost::system::error_code& ec) {
-      if (ec == boost::asio::error::operation_aborted) {
-        scheduled_tasks_.erase(id);
-        return;
-      }
-
-      (*repeating_task)();
-    };
-    *repeating_task = [task = task, timer, repeat_every, inner_handler] {
-      task();
-      timer->expires_after(as_seconds(repeat_every));
-      timer->async_wait(inner_handler);
-    };
-
-    timer->async_wait(inner_handler);
-
-    return id;
-  }
-
-  void cancel(const uuids::uuid id) {
-    std::lock_guard lock(mutex_);
-    if (const auto it = scheduled_tasks_.find(id); it != scheduled_tasks_.end()) {
-      it->second->cancel();
-      scheduled_tasks_.erase(it);
-    }
-  }
-
-  void cancel_all() {
-    for (auto it = scheduled_tasks_.begin(); it != scheduled_tasks_.end();) {
-      it->second->cancel();
-      it = scheduled_tasks_.erase(it);
-    }
-  }
+  /**
+   * Register a task owner with this scheduler
+   * @param id the id of the owner to register
+   */
+  void register_owner(uuids::uuid id);
 
  private:
   std::mutex mutex_;
-  const boost::asio::any_io_executor& executor_;
-  std::unordered_map<uuids::uuid, std::shared_ptr<boost::asio::steady_timer>> scheduled_tasks_;
+  const boost::asio::any_io_executor executor_;
+  std::unordered_map<uuids::uuid, std::shared_ptr<boost::asio::steady_timer>> tasks_;
+  std::unordered_set<uuids::uuid> owners_;
+  std::unordered_map<uuids::uuid, std::unordered_set<uuids::uuid>> owner_tasks_;
+
+  std::shared_ptr<boost::asio::steady_timer> pop_task_timer_locked(const uuids::uuid& id);
+  void cleanup_task(uuids::uuid id, const std::optional<uuids::uuid>& owner);
+};
+
+class OwnerTrackingSchedulerProxy final : public BaseScheduler {
+ public:
+  explicit OwnerTrackingSchedulerProxy(const std::shared_ptr<Scheduler>& scheduler);
+
+  ~OwnerTrackingSchedulerProxy() noexcept override;
+
+  /**
+   * Schedule a one-shot task that runs as soon as possible after an initial delay and is owned by this scheduler proxy.
+   *
+   * Note: If an owner is specified as a parameter to this method, that value will be ignored.
+   *
+   * @param delay the delay before the task runs
+   * @param task the task to run
+   * @return the id of the task
+   */
+  uuids::uuid schedule_async_task(std::chrono::milliseconds delay, std::unique_ptr<Task> task,
+                                  [[maybe_unused]] std::optional<uuids::uuid> = {}) override;
+
+  /**
+   * Schedule a repeating task that runs as soon as possible after an initial delay and repeats at the
+   * specified interval and is owned by this scheduler proxy.
+   *
+   * Note: If an owner is specified as a parameter to this method, that value will be ignored.
+   *
+   * @param delay the delay before the task runs
+   * @param interval the interval at which to repeat the task after the initial delay
+   * @param task the task to run
+   * @return the id of the repeating task
+   */
+  uuids::uuid schedule_async_repeating_task(std::chrono::milliseconds delay, std::chrono::milliseconds interval,
+                                            std::shared_ptr<Task> task,
+                                            [[maybe_unused]] std::optional<uuids::uuid> = {}) override;
+
+  void cancel(uuids::uuid id) override;
+
+ private:
+  uuids::uuid id_;
+  std::shared_ptr<Scheduler> scheduler_;
 };
 }  // namespace celerity
 

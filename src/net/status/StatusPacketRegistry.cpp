@@ -4,6 +4,8 @@
 
 #include "StatusPacketRegistry.h"
 
+#include <absl/log/log.h>
+
 #include "clientbound/PongResponsePacket.h"
 #include "clientbound/StatusResponsePacket.h"
 #include "serverbound/PingRequestPacket.h"
@@ -23,6 +25,7 @@ void register_clientbound(PacketRegistry& registry) {
 }
 
 void StatusPacketRegistry::register_all(PacketRegistry& registry) {
+  LOG(INFO) << "Registering status packets";
   register_clientbound<client::StatusResponsePacket>(registry);
   register_clientbound<client::PongResponsePacket>(registry);
 

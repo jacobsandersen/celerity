@@ -16,53 +16,69 @@
 namespace celerity::net {
 constexpr uint16_t kReadBufferSize = 8192;
 
-void Connection::start() {
-  if (running_) return;
-  running_ = true;
-  do_read();
-}
+void Connection::start() { do_read(); }
+
 void Connection::do_read() {
+  LOG(INFO) << "do_read called";
   std::vector<uint8_t> read_buffer;
   read_buffer.resize(kReadBufferSize);
 
   m_socket.async_read_some(boost::asio::buffer(read_buffer),
-                           [this, read_buffer = std::move(read_buffer)](const boost::system::error_code& err,
-                                                                        const std::size_t bytes_read) mutable {
+                           [self = shared_from_this(), read_buffer = std::move(read_buffer)](
+                               const boost::system::error_code& err, const std::size_t bytes_read) mutable {
                              if (err) {
-                               LOG(ERROR) << "Failed to read socket: " + err.message();
-                               this->close();
+                               if (err == boost::asio::error::operation_aborted) return;
+                               if (err != boost::asio::error::eof) {
+                                 LOG(ERROR) << "Failed to read socket: " + err.message();
+                               }
+                               self->close();
                                return;
                              }
+
+                             LOG(INFO) << "async_read_some cb, " << bytes_read << " bytes read";
 
                              read_buffer.resize(bytes_read);
 
                              ByteBuffer tmp(std::move(read_buffer));
-                             if (this->is_encryption_enabled()) {
-                               this->get_buffer_crypter().decrypt(tmp);
+                             if (self->is_encryption_enabled()) {
+                               self->get_buffer_crypter().decrypt(tmp);
                              }
 
-                             m_data_buffer.append(tmp);
+                             self->m_data_buffer.append(tmp);
+                             LOG(INFO) << "data appended to data buffer; data buffer has "
+                                       << self->m_data_buffer.get_data_length() << " bytes";
 
-                             process_buffer();
-                             do_read();
+                             self->process_buffer();
+                             self->do_read();
                            });
 }
 
 std::optional<ByteBuffer> Connection::try_pop_packet() {
+  LOG(INFO) << "try_pop_packet called";
   const auto maybe_packet_length = m_data_buffer.peek_varint();
   if (!maybe_packet_length) {
+    LOG(INFO) << "tpp: not enough data for packet length";
     return std::nullopt;
   }
 
   const auto [packet_length, packet_length_num_bytes] = *maybe_packet_length;
-  if (m_data_buffer.get_data_length() - packet_length_num_bytes < packet_length) {
+  if (packet_length <= 0) {
+    LOG(WARNING) << "tpp: got packet length <= 0, will not proceed";
     return std::nullopt;
   }
 
+  if (m_data_buffer.get_data_length() - packet_length_num_bytes < packet_length) {
+    LOG(INFO) << "tpp: able to read packet length but not enough data to read full packet";
+    return std::nullopt;
+  }
+
+  LOG(INFO) << "tpp: ok popping front varint";
   m_data_buffer.truncate_front(packet_length_num_bytes);
 
   size_t payload_bytes = packet_length;
   bool should_decompress = false;
+
+  LOG(INFO) << "Got packet payload bytes: " << payload_bytes;
 
   if (is_compression_enabled()) {
     uint8_t encoding_length;
@@ -71,53 +87,88 @@ std::optional<ByteBuffer> Connection::try_pop_packet() {
     should_decompress = data_length > 0;
   }
 
+  LOG(INFO) << "tpp: ok loading " << payload_bytes << " into packet payload";
   ByteBuffer payload(m_data_buffer.read_ubytes(payload_bytes));
   if (should_decompress) {
     BufferCompressor::decompress(payload);
   }
 
+  LOG(INFO) << "tpp: " << m_data_buffer.get_data_length() << " bytes remaining in connection buffer";
   return payload;
 }
 
 void Connection::process_buffer() {
+  LOG(INFO) << "process buffer called, popping as many packets as possible";
+
+  std::vector<ByteBuffer> packets;
   while (auto maybe_packet = try_pop_packet()) {
-    ByteBuffer packet = std::move(*maybe_packet);
+    LOG(INFO) << "pb: pop packet success";
+    packets.push_back(std::move(*maybe_packet));
+  }
+
+  LOG(INFO) << "pb: packet popping finished, read " << packets.size()
+            << " packets from the buffer; posting for processing";
+  for (auto packet : packets) {
+    LOG(INFO) << "pb: posting to packet handler strand";
     boost::asio::post(incoming_packet_strand_, [packet = std::move(packet), self = shared_from_this()] mutable {
+      LOG(INFO) << "strand: packet handler strand running";
       const auto packet_id = packet.read_varint();
 
-      const auto packet_info = self->registry_.get_serverbound(self->state_, packet_id);
+      LOG(INFO) << "strand: read packet id " << packet_id;
+      const auto packet_info = PacketRegistry::get_instance().get_serverbound(self->state_, packet_id);
       if (!packet_info || !packet_info->factory || !packet_info->handler) return;
 
+      LOG(INFO) << "strand: running handler";
       packet_info->handler(*packet_info->factory(packet), *self);
     });
   }
 }
 
-void Connection::send_packet(ByteBuffer payload_buffer) {
-  bool should_compress = false;
-  if (is_compression_enabled()) {
-    const auto threshold =
-        MinecraftServer::get_server()->get_config_manager().get_server_config().get_compression_threshold();
+ByteBuffer create_packet_standard_format(const int32_t packet_id, const ByteBuffer& payload_buffer) {
+  ByteBuffer wrapper_buffer;
+  wrapper_buffer.write_varint(
+      static_cast<int32_t>(VarInt::encoding_length(packet_id) + payload_buffer.get_data_length()));
+  wrapper_buffer.write_varint(packet_id);
+  wrapper_buffer.write_ubytes(payload_buffer.get_bytes());
+  return wrapper_buffer;
+}
 
-    should_compress = payload_buffer.get_data_length() > threshold;
-  }
+ByteBuffer create_packet_compression_format(const int32_t packet_id, const ByteBuffer& payload_buffer) {
+  const bool should_compress =
+      payload_buffer.get_data_length() >
+      MinecraftServer::get_server().get_config_manager().get_server_config().get_compression_threshold();
 
-  const int32_t data_length = should_compress ? static_cast<int32_t>(payload_buffer.get_data_length()) : 0;
+  const auto data_length =
+      should_compress ? static_cast<int32_t>(VarInt::encoding_length(packet_id) + payload_buffer.get_data_length()) : 0;
+
+  ByteBuffer intermediate;
+  intermediate.write_varint(packet_id);
+  intermediate.write_ubytes(payload_buffer.get_bytes());
   if (should_compress) {
-    payload_buffer = BufferCompressor::compress(payload_buffer, ZLIB);
+    intermediate = BufferCompressor::compress(intermediate, ZLIB);
   }
 
-  ByteBuffer wrapperBuffer;
-  wrapperBuffer.write_varint(
+  ByteBuffer wrapper_buffer;
+  wrapper_buffer.write_varint(
       static_cast<int32_t>(VarInt::encoding_length(data_length) + payload_buffer.get_data_length()));
-  wrapperBuffer.write_varint(data_length);
-  wrapperBuffer.write_ubytes(payload_buffer.get_bytes());
+  wrapper_buffer.write_varint(data_length);
+  wrapper_buffer.write_ubytes(intermediate.get_bytes());
+  return wrapper_buffer;
+}
+
+void Connection::send_packet(const int32_t packet_id, const ByteBuffer& payload_buffer) {
+  ByteBuffer wrapper_buffer;
+  if (is_compression_enabled()) {
+    wrapper_buffer = create_packet_compression_format(packet_id, payload_buffer);
+  } else {
+    wrapper_buffer = create_packet_standard_format(packet_id, payload_buffer);
+  }
 
   if (is_encryption_enabled()) {
-    wrapperBuffer = get_buffer_crypter().encrypt(wrapperBuffer);
+    wrapper_buffer = get_buffer_crypter().encrypt(wrapper_buffer);
   }
 
-  boost::asio::async_write(m_socket, boost::asio::buffer(wrapperBuffer.get_bytes()), boost::asio::transfer_all(),
+  boost::asio::async_write(m_socket, boost::asio::buffer(wrapper_buffer.get_bytes()), boost::asio::transfer_all(),
                            [this](const boost::system::error_code& err, const std::size_t bytes_transferred) {
                              if (err) {
                                LOG(ERROR) << "Failed to write packet: " << err.message();
@@ -127,7 +178,7 @@ void Connection::send_packet(ByteBuffer payload_buffer) {
                            });
 }
 
-tcp::socket* Connection::get_socket() { return &m_socket; }
+boost::asio::ip::tcp::socket* Connection::get_socket() { return &m_socket; }
 
 bool Connection::set_context_value(const std::string& key, const boost::any& value) {
   return m_context_map.insert_or_assign(key, value).second;
@@ -137,7 +188,8 @@ std::optional<boost::any> Connection::get_context_value(const std::string& key) 
   const auto search = m_context_map.find(key);
   return search == m_context_map.end() ? std::nullopt : search->second;
 }
-bool Connection::has_context_value(const std::string& key) const { return get_context_value(key) != std::nullopt; }
+
+bool Connection::has_context_value(const std::string& key) const { return m_context_map.contains(key); }
 
 void Connection::set_state(const ConnectionState state) { state_ = state; }
 
@@ -227,9 +279,22 @@ void Connection::send_disconnection(const std::string& reason) {
   this->close();
 }
 
-void Connection::close() {
-  disconnect_callback_(this);
-  m_socket.shutdown(boost::asio::socket_base::shutdown_both);
-  m_socket.close();
+void shutdown_socket(boost::asio::ip::tcp::socket& socket) {
+  boost::system::error_code err;
+  socket.shutdown(boost::asio::socket_base::shutdown_both, err);
+  if (err && err != boost::asio::error::not_connected && err != boost::asio::error::bad_descriptor) {
+    LOG(WARNING) << "Socket shutdown error: " << err.what();
+  }
 }
+
+void Connection::close() {
+  disconnect_callback_(shared_from_this());
+  if (m_socket.is_open()) {
+    LOG(INFO) << "Closing connection from " << m_socket.remote_endpoint().address();
+    shutdown_socket(m_socket);
+    m_socket.close();
+  }
+}
+
+std::shared_ptr<OwnerTrackingSchedulerProxy> Connection::get_scheduler() const { return scheduler_; }
 }  // namespace celerity::net

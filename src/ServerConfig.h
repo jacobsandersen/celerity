@@ -4,6 +4,8 @@
 
 #ifndef SERVERCONFIG_H
 #define SERVERCONFIG_H
+#include <absl/log/log.h>
+
 #include <toml.hpp>
 
 class ServerConfig {
@@ -12,11 +14,12 @@ class ServerConfig {
  public:
   explicit ServerConfig(const std::filesystem::path& server_root)
       : toml_(toml::parse(server_root / "config/server.toml")) {}
-  uint16_t get_server_port() const;
-  uint16_t get_compression_threshold() const;
-  uint16_t get_max_players() const;
-  std::string get_motd() const;
-  std::string get_favicon() const;
+
+  [[nodiscard]] uint16_t get_server_port() const;
+  [[nodiscard]] uint16_t get_compression_threshold() const;
+  [[nodiscard]] uint16_t get_max_players() const;
+  [[nodiscard]] std::string get_motd() const;
+  [[nodiscard]] std::string get_favicon() const;
 };
 
 #endif  // SERVERCONFIG_H

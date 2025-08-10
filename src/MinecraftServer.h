@@ -5,18 +5,18 @@
 
 #include "ConfigManager.h"
 #include "RSAKeypair.h"
-#include "net/Connection.h"
+#include "Scheduler.h"
 #include "net/NetworkManager.h"
 #include "player/Player.h"
-
-using boost::asio::ip::tcp;
 
 namespace celerity {
 class MinecraftServer {
  public:
-  static MinecraftServer* get_server();
+  [[nodiscard]] static MinecraftServer& get_server();
 
   void start();
+
+  void stop();
 
   [[nodiscard]] const net::NetworkManager& get_network_manager() const;
 
@@ -24,7 +24,7 @@ class MinecraftServer {
 
   [[nodiscard]] const RSAKeypair& get_rsa_keypair() const;
 
-  const std::string& get_version_name() const;
+  [[nodiscard]] const std::string& get_version_name() const;
 
   [[nodiscard]] uint32_t get_protocol_version() const;
 
@@ -42,16 +42,25 @@ class MinecraftServer {
 
   [[nodiscard]] const std::vector<KnownPack>& get_known_packs() const;
 
+  [[nodiscard]] std::shared_ptr<Scheduler> get_scheduler() { return scheduler_; }
+
  private:
   MinecraftServer()
       : server_root_(std::filesystem::current_path()),
         config_manager_(server_root_),
-        network_manager_(config_manager_.get_server_config()),
-        version_name_("1.21.7"),
-        protocol_version_(772) {
-    known_packs_.emplace_back("minecraft", "core", "1.21.5");
+        network_manager_(io_context_, scheduler_, config_manager_.get_server_config()),
+        version_name_("1.21.8"),
+        protocol_version_(772),
+        scheduler_(std::make_shared<Scheduler>(io_context_)) {
+    known_packs_.emplace_back("minecraft", "core", "1.21.8");
   }
 
+  void repl_loop();
+  void game_loop();
+  void tick();
+
+  std::atomic_bool running_{true};
+  boost::asio::io_context io_context_;
   std::filesystem::path server_root_;
   ConfigManager config_manager_;
   net::NetworkManager network_manager_;
@@ -60,6 +69,7 @@ class MinecraftServer {
   uint32_t protocol_version_;
   std::vector<KnownPack> known_packs_;
   std::vector<std::shared_ptr<player::Player>> players_{};
+  std::shared_ptr<Scheduler> scheduler_;
 };
 }  // namespace celerity
 #endif

@@ -6,7 +6,7 @@
 
 namespace celerity::net::configuration::server {
 void ClientInformationPacket::handle(const ClientInformationPacket& packet, Connection& connection) {
-  const auto player = MinecraftServer::get_server()->get_player(connection.get_unique_id());
+  const auto player = MinecraftServer::get_server().get_player(connection.get_unique_id());
   if (player == nullptr) {
     connection.send_disconnection("Could not get Player instance for your UUID");
     return;

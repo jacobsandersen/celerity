@@ -150,9 +150,11 @@ std::vector<uint8_t> ByteBuffer::read_ubytes(size_t num_ubytes) {
 }
 
 std::vector<uint8_t> ByteBuffer::peek_ubytes(const size_t num_ubytes) {
-  std::vector<uint8_t> vec;
+  const auto bytes_to_read = std::min(static_cast<uint32_t>(num_ubytes), get_data_length());
 
-  for (size_t i = 0; i < num_ubytes; i++) {
+  std::vector<uint8_t> vec;
+  vec.reserve(bytes_to_read);
+  for (size_t i = 0; i < bytes_to_read; i++) {
     vec.push_back(peek_ubyte(i));
   }
 
@@ -243,7 +245,7 @@ double ByteBuffer::read_be_double() {
 
 void ByteBuffer::write_string(const std::string& str) {
   write_varint(static_cast<int32_t>(str.length()));
-  for (int8_t byte : str) {
+  for (const int8_t byte : str) {
     write_byte(byte);
   }
 }
@@ -363,20 +365,6 @@ std::optional<std::pair<int32_t, uint8_t>> ByteBuffer::peek_varint() {
     uint8_t num_bytes = 0;
     const int32_t varint = tmp.read_varint(&num_bytes);
     return std::pair(varint, num_bytes);
-  } catch (std::exception&) {
-    return std::nullopt;
-  }
-}
-
-std::optional<std::vector<std::pair<int32_t, uint8_t>>> ByteBuffer::peek_varints(const size_t num_varints) {
-  try {
-    std::vector<std::pair<int32_t, uint8_t>> varints(num_varints);
-    ByteBuffer tmp(peek_ubytes(5 * num_varints));
-    for (size_t i = 0; i < num_varints; i++) {
-      uint8_t bytes_read = 0;
-      varints[i] = std::pair(tmp.read_varint(&bytes_read), bytes_read);
-    }
-    return varints;
   } catch (std::exception&) {
     return std::nullopt;
   }

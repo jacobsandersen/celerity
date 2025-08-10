@@ -1,14 +1,19 @@
 #include "KeepAlivePacket.h"
 
+#include "src/MinecraftServer.h"
 #include "src/net/Connection.h"
 #include "src/net/configuration/clientbound/KeepAlivePacket.h"
+#include "src/task/configuration/KeepAliveTask.h"
 
 namespace celerity::net::configuration::server {
 void KeepAlivePacket::handle(const KeepAlivePacket& packet, Connection& connection) {
+  LOG(INFO) << "Received keep alive response";
+
   if (const auto maybe_killer_id = connection.get_context_value("keep_alive_killer")) {
     try {
       const auto killer_id = boost::any_cast<uuids::uuid>(*maybe_killer_id);
-      connection.get_scheduler().cancel(killer_id);
+      connection.get_scheduler()->cancel(killer_id);
+      LOG(INFO) << "Cancelled previous killer task";
     } catch (boost::bad_any_cast&) {
     }
   }
@@ -27,17 +32,9 @@ void KeepAlivePacket::handle(const KeepAlivePacket& packet, Connection& connecti
   } catch (boost::bad_any_cast&) {
   }
 
-  // This is a bit cursed
-  connection.get_scheduler().schedule_task(std::chrono::seconds(15), [&connection] {
-    const auto keep_alive_payload = std::time(nullptr);
-    const auto keep_alive_killer_id = connection.get_scheduler().schedule_task(std::chrono::seconds(30), [&connection] {
-      connection.send_disconnection("Client did not respond to keep alive");
-    });
+  LOG(INFO) << "Client's keep alive response OK. Scheduling new keep alive in 15 seconds";
 
-    connection.send_packet(client::KeepAlivePacket(keep_alive_payload));
-
-    connection.set_context_value("keep_alive_payload", keep_alive_payload);
-    connection.set_context_value("keep_alive_killer", keep_alive_killer_id);
-  });
+  connection.get_scheduler()->schedule_async_task(std::chrono::seconds(15),
+                                                  std::make_unique<task::configuration::KeepAliveTask>(connection));
 }
 }  // namespace celerity::net::configuration::server

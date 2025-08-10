@@ -4,6 +4,8 @@
 
 #include "HandshakingPacketRegistry.h"
 
+#include <absl/log/log.h>
+
 #include "serverbound/IntentionPacket.h"
 
 namespace celerity::net::handshaking {
@@ -14,6 +16,7 @@ void register_serverbound(PacketRegistry& registry) {
 }
 
 void HandshakingPacketRegistry::register_all(PacketRegistry& registry) {
+  LOG(INFO) << "Registering handshaking packets";
   register_serverbound<server::IntentionPacket>(registry);
 }
 }  // namespace celerity::net::handshaking

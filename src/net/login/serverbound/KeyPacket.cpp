@@ -59,16 +59,13 @@ std::string mcHexDigest(const std::string& hashIn) {
 void KeyPacket::handle(const KeyPacket& packet, Connection& connection) {
   LOG(INFO) << "Encryption response received, beginning validation...";
 
-  MinecraftServer* server = MinecraftServer::get_server();
-  const RSAKeypair keypair = server->get_rsa_keypair();
+  MinecraftServer& server = MinecraftServer::get_server();
+  const RSAKeypair keypair = server.get_rsa_keypair();
   std::vector<uint8_t> public_key = keypair.get_der_encoded_public_key();
 
   std::vector<uint8_t> decrypted_verify_token = keypair.decrypt(packet.encrypted_verify_token_);
-  decrypted_verify_token.resize(VERIFY_TOKEN_SIZE);
 
   std::vector<uint8_t> decrypted_shared_secret = keypair.decrypt(packet.encrypted_shared_secret_);
-  decrypted_shared_secret.resize(SHARED_SECRET_SIZE);
-
   connection.enable_encryption(decrypted_shared_secret);
 
   const auto verify_token = connection.get_context_value("verify_token");
@@ -102,7 +99,7 @@ void KeyPacket::handle(const KeyPacket& packet, Connection& connection) {
 
   LOG(INFO) << "OK. Creating Yggdrasil request payload...";
 
-  std::shared_ptr<player::Player> player = server->get_player(connection.get_unique_id());
+  std::shared_ptr<player::Player> player = server.get_player(connection.get_unique_id());
   std::map<std::string, std::string> params;
   params.insert({"username", player->get_username()});
   params.insert({"serverId", finalDigest});
@@ -151,11 +148,11 @@ void KeyPacket::handle(const KeyPacket& packet, Connection& connection) {
 
   LOG(INFO) << "OK. Checking if we need to enable compression for the connection...";
 
-  if (const auto compression_threshold = server->get_config_manager().get_server_config().get_compression_threshold();
+  if (const auto compression_threshold = server.get_config_manager().get_server_config().get_compression_threshold();
       compression_threshold > 0) {
-    LOG(INFO) << "Enabling connection compression with threshold " << compression_threshold;
-    connection.send_packet(client::LoginCompressionPacket(compression_threshold));
-    connection.enable_compression();
+    // LOG(INFO) << "Enabling connection compression with threshold " << compression_threshold;
+    // connection.send_packet(client::LoginCompressionPacket(compression_threshold));
+    // connection.enable_compression();
   }
 
   LOG(INFO) << "OK. Sending login success...";

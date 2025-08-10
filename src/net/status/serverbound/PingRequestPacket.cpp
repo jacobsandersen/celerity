@@ -9,7 +9,9 @@
 
 namespace celerity::net::status::server {
 void PingRequestPacket::handle(const PingRequestPacket& packet, Connection& connection) {
+  LOG(INFO) << "ping request received with timestamp " << packet.timestamp_ << "; replying";
   connection.send_packet(client::PongResponsePacket{packet.timestamp_});
+  LOG(INFO) << "closing connection";
   connection.close();
 }
 }  // namespace celerity::net::status::server

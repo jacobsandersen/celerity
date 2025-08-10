@@ -30,6 +30,7 @@ void register_clientbound(PacketRegistry& registry) {
 }
 
 void LoginPacketRegistry::register_all(PacketRegistry& registry) {
+  LOG(INFO) << "Registering login packets";
   register_clientbound<client::LoginDisconnectPacket>(registry);
   register_clientbound<client::HelloPacket>(registry);
   register_clientbound<client::LoginFinishedPacket>(registry);

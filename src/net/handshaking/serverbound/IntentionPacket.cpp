@@ -11,11 +11,14 @@
 
 namespace celerity::net::handshaking::server {
 void IntentionPacket::handle(const IntentionPacket& packet, Connection& connection) {
+  LOG(INFO) << "Received intention packet, client wants next state " << static_cast<int32_t>(packet.next_state_);
   switch (packet.next_state_) {
     case ClientIntention::Status:
+      LOG(INFO) << "Switching to status state";
       connection.set_state(ConnectionState::kStatus);
       break;
     case ClientIntention::Login:
+      LOG(INFO) << "Switching to login state";
       connection.set_state(ConnectionState::kLogin);
       break;
     case ClientIntention::Transfer:

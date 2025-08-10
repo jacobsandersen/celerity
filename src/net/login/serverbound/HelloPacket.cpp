@@ -23,7 +23,7 @@ void HelloPacket::handle(const HelloPacket& packet, Connection& connection) {
   connection.set_unique_id(unique_id_ptr);
 
   const auto player = std::make_shared<player::Player>(connection, username_);
-  MinecraftServer::get_server()->add_player(player);
+  MinecraftServer::get_server().add_player(player);
 
   LOG(INFO) << "Generating verify token challenge for client...";
 
@@ -37,7 +37,7 @@ void HelloPacket::handle(const HelloPacket& packet, Connection& connection) {
   LOG(INFO) << "Getting server's encoded public key...";
 
   const std::vector<uint8_t> encoded_public_key =
-      MinecraftServer::get_server()->get_rsa_keypair().get_der_encoded_public_key();
+      MinecraftServer::get_server().get_rsa_keypair().get_der_encoded_public_key();
 
   LOG(INFO) << "Sending encryption request to user's client...";
 

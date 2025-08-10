@@ -30,10 +30,15 @@ target_sources(celerity PRIVATE
         src/ByteBuffer.cpp
         src/BufferCrypter.cpp
         src/BufferCompressor.cpp
+        src/Scheduler.cpp
         src/util/RandUtil.cpp
         src/util/UUIDUtil.cpp
         src/player/MojangProfile.cpp
         src/player/Player.cpp
+        src/task/configuration/ConfigurationTask.cpp
+        src/task/configuration/KeepAliveKillerTask.cpp
+        src/task/configuration/KeepAliveTask.cpp
+        src/task/configuration/RegistryDataTask.cpp
         src/net/NetworkManager.cpp
         src/net/HttpClient.cpp
         src/net/Connection.cpp
@@ -85,6 +90,7 @@ target_sources(celerity PRIVATE
         src/net/configuration/serverbound/PongPacket.cpp
         src/net/configuration/serverbound/ResourcePackPacket.cpp
         src/net/configuration/serverbound/SelectKnownPacksPacket.cpp
+        src/net/play/PlayPacketRegistry.cpp
         src/nbt/NBTWriter.cpp
         src/nbt/NBTReader.cpp
 )

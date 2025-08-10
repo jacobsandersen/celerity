@@ -4,6 +4,8 @@
 
 #include "ConfigurationPacketRegistry.h"
 
+#include <absl/log/log.h>
+
 #include "clientbound/ClearDialogPacket.h"
 #include "clientbound/CookieRequestPacket.h"
 #include "clientbound/CustomPayloadPacket.h"
@@ -47,6 +49,7 @@ void register_clientbound(PacketRegistry& registry) {
 }
 
 void ConfigurationPacketRegistry::register_all(PacketRegistry& registry) {
+  LOG(INFO) << "Registering configuration packets";
   register_clientbound<client::CookieRequestPacket>(registry);
   register_clientbound<client::CustomPayloadPacket>(registry);
   register_clientbound<client::DisconnectPacket>(registry);
