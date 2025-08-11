@@ -18,7 +18,12 @@ class TagCompoundBuilder : public std::enable_shared_from_this<TagCompoundBuilde
   explicit TagCompoundBuilder(icu::UnicodeString name)
       : m_name(std::move(name)), m_compound(std::make_unique<tag::TagCompound>()) {}
 
-  static std::shared_ptr<TagCompoundBuilder> create() { return create(""); }
+  static std::shared_ptr<TagCompoundBuilder> create() {
+    auto bogus = icu::UnicodeString();
+    bogus.setToBogus();
+
+    return create(bogus);
+  }
 
   static std::shared_ptr<TagCompoundBuilder> create(const icu::UnicodeString& name) {
     return std::make_shared<TagCompoundBuilder>(name);
@@ -27,7 +32,7 @@ class TagCompoundBuilder : public std::enable_shared_from_this<TagCompoundBuilde
   template <typename T>
     requires DerivedTag<T> && (!IsTagEnd<T>)
   std::shared_ptr<TagCompoundBuilder> add(const icu::UnicodeString& name, T item) {
-    m_compound->add(name, std::make_unique<T>(item));
+    m_compound->add(name, std::make_unique<T>(std::move(item)));
     return shared_from_this();
   }
 

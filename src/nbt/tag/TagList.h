@@ -33,6 +33,7 @@ class TagList final : public Tag {
     }
     m_internal_list.push_back(std::move(tag));
   }
+
   [[nodiscard]] TagType get_child_type() const { return m_child_type; }
 
   [[nodiscard]] std::vector<std::unique_ptr<Tag>> &get_items() { return m_internal_list; }

@@ -30,8 +30,8 @@ void NBTWriter::write_tag(const std::unique_ptr<tag::Tag>& tag) const {
   write_tag(bogus, tag);
 }
 
-void NBTWriter::write_tag(const icu::UnicodeString& name,
-                          const std::unique_ptr<tag::Tag>& tag) const {  // NOLINT(*-no-recursion)
+void NBTWriter::write_tag(const icu::UnicodeString& name,  // NOLINT(*-no-recursion)
+                          const std::unique_ptr<tag::Tag>& tag) const {
   if (tag == nullptr) return;
 
   const auto type = tag->get_type();

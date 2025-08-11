@@ -47,6 +47,13 @@ void NetworkManager::start() {
 }
 
 void NetworkManager::shutdown() {
+  const auto conns = std::move(connections_);
+  connections_.clear();
+
+  for (auto& conn : conns) {
+    conn->send_disconnection("Server is shutting down");
+  }
+
   acceptor_.cancel();
   acceptor_.close();
 }
