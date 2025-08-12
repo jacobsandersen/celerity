@@ -282,7 +282,7 @@ void ByteBuffer::write_string_modified_utf8(const icu::UnicodeString& str) {
 }
 
 icu::UnicodeString ByteBuffer::read_string_modified_utf8() {
-  uint16_t length = read_be_ushort();
+  const uint16_t length = read_be_ushort();
 
   std::queue<int8_t> bytes;
   for (int i = 0; i < length; i++) {
@@ -292,7 +292,7 @@ icu::UnicodeString ByteBuffer::read_string_modified_utf8() {
   icu::UnicodeString str;
 
   while (!bytes.empty()) {
-    int8_t first_byte = bytes.front();
+    const int8_t first_byte = bytes.front();
     bytes.pop();
 
     if ((first_byte >> 4) == 0b1111 || (first_byte >> 6) == 0b10) {

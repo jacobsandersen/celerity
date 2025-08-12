@@ -7,6 +7,7 @@ set(CMAKE_BUILD_TYPE Debug)
 find_package(boost_asio CONFIG REQUIRED)
 find_package(boost_endian CONFIG REQUIRED)
 find_package(boost_any CONFIG REQUIRED)
+find_package(boost_container CONFIG REQUIRED)
 find_package(jsoncpp CONFIG REQUIRED)
 find_package(cryptopp CONFIG REQUIRED)
 find_package(stduuid CONFIG REQUIRED)
@@ -31,6 +32,8 @@ target_sources(celerity PRIVATE
         src/BufferCrypter.cpp
         src/BufferCompressor.cpp
         src/Scheduler.cpp
+        src/Identifier.cpp
+        src/registry/Registry.cpp
         src/util/RandUtil.cpp
         src/util/UUIDUtil.cpp
         src/player/MojangProfile.cpp
@@ -118,7 +121,7 @@ target_sources(celerity PRIVATE FILE_SET nbt_headers TYPE HEADERS FILES
 )
 
 target_link_libraries(celerity PRIVATE
-        Boost::asio Boost::endian Boost::any JsonCpp::JsonCpp cryptopp::cryptopp stduuid
-        CURL::libcurl toml11::toml11 absl::log absl::log_initialize ZLIB::ZLIB
-        PkgConfig::ICU
+        Boost::asio Boost::endian Boost::any Boost::container JsonCpp::JsonCpp
+        cryptopp::cryptopp stduuid CURL::libcurl toml11::toml11 absl::log absl::log_initialize
+        ZLIB::ZLIB PkgConfig::ICU
 )
