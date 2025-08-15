@@ -8,6 +8,7 @@
 #include "Scheduler.h"
 #include "net/NetworkManager.h"
 #include "player/Player.h"
+#include "registry/Registry.h"
 
 namespace celerity {
 class MinecraftServer {
@@ -44,6 +45,8 @@ class MinecraftServer {
 
   [[nodiscard]] std::shared_ptr<Scheduler> get_scheduler() { return scheduler_; }
 
+  [[nodiscard]] const std::vector<registry::Registry>& get_registries();
+
  private:
   MinecraftServer()
       : server_root_(std::filesystem::current_path()),
@@ -70,6 +73,7 @@ class MinecraftServer {
   std::vector<KnownPack> known_packs_;
   std::vector<std::shared_ptr<player::Player>> players_{};
   std::shared_ptr<Scheduler> scheduler_;
+  std::vector<registry::Registry> registries_;
 };
 }  // namespace celerity
 #endif

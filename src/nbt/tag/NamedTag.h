@@ -20,6 +20,16 @@ class NamedTag {
  public:
   NamedTag(icu::UnicodeString name, std::unique_ptr<Tag> tag) : name_(std::move(name)), tag_(std::move(tag)) {}
 
+  NamedTag(NamedTag&& other) noexcept : name_(std::move(other.name_)), tag_(std::move(other.tag_)) {}
+  NamedTag& operator=(NamedTag&& other) noexcept {
+    name_ = std::move(other.name_);
+    tag_ = std::move(other.tag_);
+    return *this;
+  }
+
+  NamedTag(const NamedTag&) = delete;
+  NamedTag& operator=(const NamedTag&) = delete;
+
   [[nodiscard]] icu::UnicodeString get_name() const { return name_; }
   [[nodiscard]] const std::unique_ptr<Tag>& get_tag() const { return tag_; }
 };

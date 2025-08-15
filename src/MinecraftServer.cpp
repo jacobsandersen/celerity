@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "VarInt.h"
+#include "registry/RegistryLoader.h"
 
 namespace celerity {
 MinecraftServer* instance = nullptr;
@@ -15,6 +16,9 @@ MinecraftServer& MinecraftServer::get_server() {
 void MinecraftServer::start() {
   LOG(INFO) << "Initializing packet registry...";
   net::PacketRegistry::get_instance();
+
+  LOG(INFO) << "Loading data registries...";
+  registries_ = registry::RegistryLoader::load_registries(server_root_);
 
   LOG(INFO) << "Spawning IO threads...";
   const auto work_guard = boost::asio::make_work_guard(io_context_);
@@ -102,6 +106,8 @@ uint32_t MinecraftServer::get_protocol_version() const { return protocol_version
 const std::string& MinecraftServer::get_version_name() const { return version_name_; }
 
 const std::vector<KnownPack>& MinecraftServer::get_known_packs() const { return known_packs_; }
+
+const std::vector<registry::Registry>& MinecraftServer::get_registries() { return registries_; }
 
 void MinecraftServer::repl_loop() {
   std::string line;

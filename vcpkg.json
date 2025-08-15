@@ -10,7 +10,9 @@
     "zlib",
     "boost-asio",
     "boost-endian",
-    "boost-any"
+    "boost-any",
+    "boost-container",
+    "boost-algorithm"
   ],
   "version": "0.0.1",
   "name": "celerity"

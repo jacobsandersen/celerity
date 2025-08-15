@@ -13,17 +13,17 @@ ByteBuffer DisconnectPacket::encode() const {
   ByteBuffer buf;
   const nbt::NBTWriter writer(buf);
 
-  const auto component = nbt::TagCompoundBuilder::create()
-                             ->add("type", nbt::tag::TagString("text"))
-                             ->add("text", nbt::tag::TagString("Disconnected during configuration: "))
-                             ->add("extra", nbt::TagListBuilder<nbt::tag::TagString>::create(
-                                                nbt::tag::TagString(icu::UnicodeString(reason_.data())))
-                                                ->build_list())
-                             ->add("color", nbt::tag::TagString("red"))
-                             ->add("bold", nbt::tag::TagByte(1))
-                             ->build();
+  auto component = nbt::TagCompoundBuilder::create()
+                       ->add("type", nbt::tag::TagString("text"))
+                       ->add("text", nbt::tag::TagString("Disconnected during configuration: "))
+                       ->add("extra", nbt::TagListBuilder<nbt::tag::TagString>::create(
+                                          nbt::tag::TagString(icu::UnicodeString(reason_.data())))
+                                          ->build_list())
+                       ->add("color", nbt::tag::TagString("red"))
+                       ->add("bold", nbt::tag::TagByte(1))
+                       ->build_compound_ptr();
 
-  writer.write_tag(component);
+  writer.write_tag(*component);
   return buf;
 }
 }  // namespace celerity::net::configuration::client
