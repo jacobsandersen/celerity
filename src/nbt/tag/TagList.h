@@ -15,7 +15,6 @@ namespace celerity::nbt::tag {
 class TagList final : public Tag {
  public:
   explicit TagList(const TagType &child_type) : TagList(child_type, {}) {}
-
   TagList(TagType child_type, std::vector<std::unique_ptr<Tag>> items)
       : Tag(TagType::List), m_child_type(std::move(child_type)), m_internal_list(std::move(items)) {
     for (const auto &item : items) {
@@ -25,6 +24,20 @@ class TagList final : public Tag {
       }
     }
   }
+
+  TagList(TagList &&other) noexcept
+      : Tag(TagType::List),
+        m_child_type(std::move(other.m_child_type)),
+        m_internal_list(std::move(other.m_internal_list)) {}
+  TagList& operator=(TagList&& other) noexcept {
+    Tag::operator=(other);
+    m_child_type = std::move(other.get_type());
+    m_internal_list = std::move(other.m_internal_list);
+    return *this;
+  }
+
+  TagList(const TagList &) = delete;
+  TagList &operator=(const TagList &) = delete;
 
   void add(std::unique_ptr<Tag> tag) {
     if (m_child_type != tag->get_type()) {

@@ -19,9 +19,7 @@ Identifier RegistryEntry::get_entry_id() const { return entry_id_; }
 
 const std::optional<nbt::tag::TagCompound>& RegistryEntry::get_data() const { return data_; }
 
-Registry::Registry(Identifier registry_id) : registry_id_(std::move(registry_id)) {}
-
-void Registry::add_entry(RegistryEntry entry) { entries_.push_back(std::move(entry)); }
+Registry::Registry(Identifier registry_id, std::vector<RegistryEntry> entries) : registry_id_(std::move(registry_id)), entries_(std::move(entries)) {}
 
 ByteBuffer& Registry::write(ByteBuffer& buffer) const {
   buffer.write_string(registry_id_.to_string());

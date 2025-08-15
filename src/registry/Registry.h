@@ -5,8 +5,6 @@
 #ifndef REGISTRY_H
 #define REGISTRY_H
 
-#include <deque>
-
 #include "src/Identifier.h"
 #include "src/nbt/tag/TagCompound.h"
 
@@ -23,18 +21,27 @@ class RegistryEntry {
   explicit RegistryEntry(const Identifier& entry_id);
   RegistryEntry(Identifier entry_id, std::optional<nbt::tag::TagCompound> data);
 
+  RegistryEntry(RegistryEntry&& other) noexcept
+      : entry_id_(std::move(other.entry_id_)), data_(std::move(other.data_)) {}
+  RegistryEntry& operator=(RegistryEntry&& other) noexcept {
+    entry_id_ = std::move(other.entry_id_);
+    data_ = std::move(other.data_);
+    return *this;
+  }
+
+  RegistryEntry(const RegistryEntry&) = delete;
+  RegistryEntry& operator=(const RegistryEntry&) = delete;
+
   [[nodiscard]] Identifier get_entry_id() const;
   [[nodiscard]] const std::optional<nbt::tag::TagCompound>& get_data() const;
 };
 
 class Registry {
   Identifier registry_id_;
-  std::deque<RegistryEntry> entries_{};
+  std::vector<RegistryEntry> entries_;
 
  public:
-  explicit Registry(Identifier registry_id);
-
-  void add_entry(RegistryEntry entry);
+  Registry(Identifier registry_id, std::vector<RegistryEntry> entries);
 
   ByteBuffer& write(ByteBuffer& buffer) const;
 };

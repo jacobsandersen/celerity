@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "VarInt.h"
+#include "registry/RegistryLoader.h"
 
 namespace celerity {
 MinecraftServer* instance = nullptr;
@@ -15,6 +16,9 @@ MinecraftServer& MinecraftServer::get_server() {
 void MinecraftServer::start() {
   LOG(INFO) << "Initializing packet registry...";
   net::PacketRegistry::get_instance();
+
+  LOG(INFO) << "Loading data registries...";
+  registries_ = registry::RegistryLoader::load_registries(server_root_);
 
   LOG(INFO) << "Spawning IO threads...";
   const auto work_guard = boost::asio::make_work_guard(io_context_);

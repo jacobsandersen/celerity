@@ -86,7 +86,7 @@ std::unique_ptr<tag::Tag> convertFloating(const Json::Value& value) {
     throw std::runtime_error("Can't convert floating point to NBT representation: " + std::to_string(number));
   }
 
-  if (const float f = static_cast<float>(number); static_cast<double>(f) == number) {
+  if (const auto f = static_cast<float>(number); static_cast<double>(f) == number) {
     return std::make_unique<tag::TagFloat>(f);
   }
 
@@ -129,6 +129,10 @@ std::unique_ptr<tag::Tag> convert(Json::Value value) {
       std::vector<std::unique_ptr<tag::Tag>> items;
       for (const auto& item : value) {
         items.push_back(convert(item));
+      }
+
+      if (items.empty()) {
+        return std::make_unique<tag::TagList>(tag::TagType::End);
       }
 
       const auto first_type = items[0]->get_type();
@@ -177,7 +181,7 @@ tag::TagCompound Json2NBTReader::convertToNbt(const icu::UnicodeString& name) co
   const auto builder = TagCompoundBuilder::create(name.isBogus() ? "" : name);
 
   for (auto& member_name : json_.getMemberNames()) {
-    builder->add(member_name.data(), convert(member_name));
+    builder->add(member_name.data(), convert(json_[member_name]));
   }
 
   return builder->build_compound();

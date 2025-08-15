@@ -8,6 +8,7 @@
 #include "Scheduler.h"
 #include "net/NetworkManager.h"
 #include "player/Player.h"
+#include "registry/Registry.h"
 
 namespace celerity {
 class MinecraftServer {
@@ -70,6 +71,7 @@ class MinecraftServer {
   std::vector<KnownPack> known_packs_;
   std::vector<std::shared_ptr<player::Player>> players_{};
   std::shared_ptr<Scheduler> scheduler_;
+  std::vector<registry::Registry> registries_;
 };
 }  // namespace celerity
 #endif

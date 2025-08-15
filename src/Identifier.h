@@ -14,13 +14,12 @@ class Identifier {
   std::string name_;
 
  public:
+  explicit Identifier(std::string name);
   Identifier(std::string ns, std::string name) : namespace_(std::move(ns)), name_(std::move(name)) {}
 
   [[nodiscard]] const std::string& get_namespace() const;
   [[nodiscard]] const std::string& get_name() const;
   [[nodiscard]] std::string to_string() const;
-
-  constexpr std::ostream& operator<<(std::ostream& os) const;
 };
 }  // namespace celerity
 
