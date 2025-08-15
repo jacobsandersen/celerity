@@ -96,6 +96,7 @@ target_sources(celerity PRIVATE
         src/net/play/PlayPacketRegistry.cpp
         src/nbt/NBTWriter.cpp
         src/nbt/NBTReader.cpp
+        src/nbt/Json2NBTReader.cpp
 )
 
 target_sources(celerity PRIVATE FILE_SET nbt_headers TYPE HEADERS FILES

@@ -9,16 +9,19 @@
 
 namespace celerity::nbt::tag {
 class Tag {
- public:
-  explicit Tag(TagType type) : m_type(std::move(type)) {}
+public:
+  explicit Tag(TagType type) : m_type(std::move(type)) {
+  }
 
   virtual ~Tag() = default;
 
   [[nodiscard]] TagType get_type() const { return m_type; }
 
- private:
+
+
+private:
   TagType m_type;
 };
-}  // namespace celerity::nbt::tag
+} // namespace celerity::nbt::tag
 
 #endif

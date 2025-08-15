@@ -13,7 +13,7 @@ ByteBuffer DisconnectPacket::encode() const {
   ByteBuffer buf;
   const nbt::NBTWriter writer(buf);
 
-  const auto component = nbt::TagCompoundBuilder::create()
+  auto component = nbt::TagCompoundBuilder::create()
                              ->add("type", nbt::tag::TagString("text"))
                              ->add("text", nbt::tag::TagString("Disconnected during configuration: "))
                              ->add("extra", nbt::TagListBuilder<nbt::tag::TagString>::create(
@@ -21,9 +21,9 @@ ByteBuffer DisconnectPacket::encode() const {
                                                 ->build_list())
                              ->add("color", nbt::tag::TagString("red"))
                              ->add("bold", nbt::tag::TagByte(1))
-                             ->build();
+                             ->build_compound_ptr();
 
-  writer.write_tag(component);
+  writer.write_tag(std::unique_ptr<nbt::tag::Tag>(std::move(component)));
   return buf;
 }
 }  // namespace celerity::net::configuration::client
