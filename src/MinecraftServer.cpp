@@ -107,6 +107,8 @@ const std::string& MinecraftServer::get_version_name() const { return version_na
 
 const std::vector<KnownPack>& MinecraftServer::get_known_packs() const { return known_packs_; }
 
+const std::vector<registry::Registry>& MinecraftServer::get_registries() { return registries_; }
+
 void MinecraftServer::repl_loop() {
   std::string line;
   while (running_ && std::getline(std::cin, line)) {

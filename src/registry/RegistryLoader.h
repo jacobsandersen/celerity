@@ -10,11 +10,12 @@
 
 namespace celerity::registry {
 class RegistryLoader {
-public:
+ public:
   static std::vector<Registry> load_registries(const std::filesystem::path& server_root);
-private:
+
+ private:
   RegistryLoader() = default;
 };
-}
+}  // namespace celerity::registry
 
-#endif //CELERITY_REGISTRYLOADER_H
+#endif  // CELERITY_REGISTRYLOADER_H

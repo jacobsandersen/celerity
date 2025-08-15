@@ -14,11 +14,11 @@ class NBTWriter {
  public:
   explicit NBTWriter(ByteBuffer& buffer) : buffer_(buffer) {}
   void write_tag(const tag::NamedTag& tag) const;
-  void write_tag(const std::unique_ptr<tag::Tag>& tag) const;
-  void write_tag(const icu::UnicodeString& name, const std::unique_ptr<tag::Tag>& tag) const;
+  void write_tag(const tag::Tag& tag) const;
+  void write_tag(const icu::UnicodeString& name, const tag::Tag& tag) const;
 
  private:
-  void write_payload(const std::unique_ptr<tag::Tag>& tag) const;
+  void write_payload(const tag::Tag& tag) const;
 };
 }  // namespace celerity::nbt
 #endif  // NBTWRITER_H

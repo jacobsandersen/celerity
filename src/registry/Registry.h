@@ -43,6 +43,12 @@ class Registry {
  public:
   Registry(Identifier registry_id, std::vector<RegistryEntry> entries);
 
+  [[nodiscard]] const Identifier& get_registry_id() const;
+
+  [[nodiscard]] const std::vector<RegistryEntry>& get_entries() const;
+
+  [[nodiscard]] size_t get_size() const;
+
   ByteBuffer& write(ByteBuffer& buffer) const;
 };
 }  // namespace celerity::registry

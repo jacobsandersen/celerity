@@ -4,6 +4,8 @@
 
 #include "NBTWriter.h"
 
+#include <absl/log/log.h>
+
 #include "TagUtil.h"
 #include "tag/TagByte.h"
 #include "tag/TagByteArray.h"
@@ -20,10 +22,15 @@
 
 namespace celerity::nbt {
 void NBTWriter::write_tag(const tag::NamedTag& tag) const {  // NOLINT(*-no-recursion)
-  write_tag(tag.get_name(), tag.get_tag());
+  if (tag.get_tag() == nullptr) {
+    LOG(WARNING) << "Tried to write named tag with null inner tag";
+    return;
+  }
+
+  write_tag(tag.get_name(), *tag.get_tag());
 }
 
-void NBTWriter::write_tag(const std::unique_ptr<tag::Tag>& tag) const {
+void NBTWriter::write_tag(const tag::Tag& tag) const {
   icu::UnicodeString bogus;
   bogus.setToBogus();
 
@@ -31,10 +38,8 @@ void NBTWriter::write_tag(const std::unique_ptr<tag::Tag>& tag) const {
 }
 
 void NBTWriter::write_tag(const icu::UnicodeString& name,  // NOLINT(*-no-recursion)
-                          const std::unique_ptr<tag::Tag>& tag) const {
-  if (tag == nullptr) return;
-
-  const auto type = tag->get_type();
+                          const tag::Tag& tag) const {
+  const auto type = tag.get_type();
   if (type == tag::TagType::End) {
     throw std::runtime_error("Cannot write a top-level Tag_END");
   }
@@ -44,8 +49,8 @@ void NBTWriter::write_tag(const icu::UnicodeString& name,  // NOLINT(*-no-recurs
   write_payload(tag);
 }
 
-void NBTWriter::write_payload(const std::unique_ptr<tag::Tag>& tag) const {  // NOLINT(*-no-recursion)
-  switch (tag->get_type().get_type_id()) {
+void NBTWriter::write_payload(const tag::Tag& tag) const {  // NOLINT(*-no-recursion)
+  switch (tag.get_type().get_type_id()) {
     // End
     case 0: {
       buffer_.write_ubyte(0);
@@ -53,37 +58,37 @@ void NBTWriter::write_payload(const std::unique_ptr<tag::Tag>& tag) const {  // 
     }
     // Byte
     case 1: {
-      buffer_.write_byte(TagUtil::downcast<tag::TagByte>(tag)->get_byte());
+      buffer_.write_byte(TagUtil::downcast<tag::TagByte>(tag).get_byte());
       break;
     }
     // Short
     case 2: {
-      buffer_.write_be_short(TagUtil::downcast<tag::TagShort>(tag)->get_short());
+      buffer_.write_be_short(TagUtil::downcast<tag::TagShort>(tag).get_short());
       break;
     }
     // Int
     case 3: {
-      buffer_.write_be_int(TagUtil::downcast<tag::TagInt>(tag)->get_int());
+      buffer_.write_be_int(TagUtil::downcast<tag::TagInt>(tag).get_int());
       break;
     }
     // Long
     case 4: {
-      buffer_.write_be_long(TagUtil::downcast<tag::TagLong>(tag)->get_long());
+      buffer_.write_be_long(TagUtil::downcast<tag::TagLong>(tag).get_long());
       break;
     }
     // Float
     case 5: {
-      buffer_.write_be_float(TagUtil::downcast<tag::TagFloat>(tag)->get_float());
+      buffer_.write_be_float(TagUtil::downcast<tag::TagFloat>(tag).get_float());
       break;
     }
     // Double
     case 6: {
-      buffer_.write_be_double(TagUtil::downcast<tag::TagDouble>(tag)->get_double());
+      buffer_.write_be_double(TagUtil::downcast<tag::TagDouble>(tag).get_double());
       break;
     }
     // ByteArray
     case 7: {
-      const auto bytes = TagUtil::downcast<tag::TagByteArray>(tag)->get_bytes();
+      const auto bytes = TagUtil::downcast<tag::TagByteArray>(tag).get_bytes();
       buffer_.write_be_int(static_cast<int32_t>(bytes.size()));
       for (const int8_t byte : bytes) {
         buffer_.write_byte(byte);
@@ -92,23 +97,24 @@ void NBTWriter::write_payload(const std::unique_ptr<tag::Tag>& tag) const {  // 
     }
     // String
     case 8: {
-      buffer_.write_string_modified_utf8(TagUtil::downcast<tag::TagString>(tag)->get_string());
+      buffer_.write_string_modified_utf8(TagUtil::downcast<tag::TagString>(tag).get_string());
       break;
     }
     // List
     case 9: {
-      const auto list_tag = TagUtil::downcast<tag::TagList>(tag);
-      const auto& items = list_tag->get_items();
-      buffer_.write_ubyte(list_tag->get_child_type().get_type_id());
+      auto& list_tag = TagUtil::downcast<tag::TagList>(tag);
+      const auto& items = list_tag.get_items();
+      buffer_.write_ubyte(list_tag.get_child_type().get_type_id());
       buffer_.write_be_int(static_cast<int32_t>(items.size()));
       for (auto& item : items) {
-        write_payload(item);
+        if (item == nullptr) continue;
+        write_payload(*item);
       }
       break;
     }
     // Compound
     case 10: {
-      for (const auto& tags = TagUtil::downcast<tag::TagCompound>(tag)->get_tags(); auto& named_tag : tags) {
+      for (const auto& tags = TagUtil::downcast<tag::TagCompound>(tag).get_tags(); auto& named_tag : tags) {
         write_tag(named_tag);
       }
       buffer_.write_ubyte(0);  // Tag End
@@ -116,7 +122,7 @@ void NBTWriter::write_payload(const std::unique_ptr<tag::Tag>& tag) const {  // 
     }
     // IntArray
     case 11: {
-      const auto ints = TagUtil::downcast<tag::TagIntArray>(tag)->get_ints();
+      const auto ints = TagUtil::downcast<tag::TagIntArray>(tag).get_ints();
       buffer_.write_be_int(static_cast<int32_t>(ints.size()));
       for (const int32_t int_ : ints) {
         buffer_.write_be_int(int_);
@@ -125,7 +131,7 @@ void NBTWriter::write_payload(const std::unique_ptr<tag::Tag>& tag) const {  // 
     }
     // LongArray
     case 12: {
-      const auto longs = TagUtil::downcast<tag::TagLongArray>(tag)->get_longs();
+      const auto longs = TagUtil::downcast<tag::TagLongArray>(tag).get_longs();
       buffer_.write_be_int(static_cast<int32_t>(longs.size()));
       for (const int64_t long_ : longs) {
         buffer_.write_be_long(long_);

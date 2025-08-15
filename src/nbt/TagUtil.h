@@ -21,6 +21,16 @@ struct TagUtil {
     return downcasted;
   }
 
+  template <typename T>
+    requires DerivedTag<T>
+  static const T& downcast(const tag::Tag& base_tag) {
+    try {
+      return dynamic_cast<const T&>(base_tag);
+    } catch (const std::bad_cast&) {
+      throw std::runtime_error("Attempted to downcast tag ref, but cast failed. Malformed NBT?");
+    }
+  }
+
  private:
   TagUtil() = default;
 };

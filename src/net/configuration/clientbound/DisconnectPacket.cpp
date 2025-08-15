@@ -23,7 +23,7 @@ ByteBuffer DisconnectPacket::encode() const {
                        ->add("bold", nbt::tag::TagByte(1))
                        ->build_compound_ptr();
 
-  writer.write_tag(std::unique_ptr<nbt::tag::Tag>(std::move(component)));
+  writer.write_tag(*component);
   return buf;
 }
 }  // namespace celerity::net::configuration::client

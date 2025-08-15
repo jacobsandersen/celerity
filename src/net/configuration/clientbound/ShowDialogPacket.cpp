@@ -10,7 +10,7 @@ namespace celerity::net::configuration::client {
 ByteBuffer ShowDialogPacket::encode() const {
   ByteBuffer buf;
   const nbt::NBTWriter writer(buf);
-  writer.write_tag(dialog_);
+  writer.write_tag(*dialog_);
   return buf;
 }
 }  // namespace celerity::net::configuration::client

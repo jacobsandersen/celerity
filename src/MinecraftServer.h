@@ -45,6 +45,8 @@ class MinecraftServer {
 
   [[nodiscard]] std::shared_ptr<Scheduler> get_scheduler() { return scheduler_; }
 
+  [[nodiscard]] const std::vector<registry::Registry>& get_registries();
+
  private:
   MinecraftServer()
       : server_root_(std::filesystem::current_path()),

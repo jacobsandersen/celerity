@@ -29,7 +29,7 @@ class TagList final : public Tag {
       : Tag(TagType::List),
         m_child_type(std::move(other.m_child_type)),
         m_internal_list(std::move(other.m_internal_list)) {}
-  TagList& operator=(TagList&& other) noexcept {
+  TagList &operator=(TagList &&other) noexcept {
     Tag::operator=(other);
     m_child_type = std::move(other.get_type());
     m_internal_list = std::move(other.m_internal_list);
@@ -49,7 +49,7 @@ class TagList final : public Tag {
 
   [[nodiscard]] TagType get_child_type() const { return m_child_type; }
 
-  [[nodiscard]] std::vector<std::unique_ptr<Tag>> &get_items() { return m_internal_list; }
+  [[nodiscard]] const std::vector<std::unique_ptr<Tag>> &get_items() const { return m_internal_list; }
 
  private:
   TagType m_child_type;
