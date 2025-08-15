@@ -10,20 +10,20 @@
 
 namespace celerity::nbt {
 struct TagUtil {
-  template <typename T> requires DerivedTag<T>
+  template <typename T>
+    requires DerivedTag<T>
   static T* downcast(const std::unique_ptr<tag::Tag>& base_tag) {
     auto* downcasted = dynamic_cast<T*>(base_tag.get());
     if (downcasted == nullptr) {
-      throw std::runtime_error(
-          "Attempted to downcast tag, but did not get expected type. Malformed NBT?");
+      throw std::runtime_error("Attempted to downcast tag, but did not get expected type. Malformed NBT?");
     }
 
     return downcasted;
   }
 
-private:
+ private:
   TagUtil() = default;
 };
-}
+}  // namespace celerity::nbt
 
-#endif //CELERITY_TAGUTIL_H
+#endif  // CELERITY_TAGUTIL_H

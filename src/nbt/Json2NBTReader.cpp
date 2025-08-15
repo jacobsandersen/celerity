@@ -83,8 +83,7 @@ std::unique_ptr<tag::Tag> convertUnsigned(const Json::Value& value) {
 std::unique_ptr<tag::Tag> convertFloating(const Json::Value& value) {
   const auto number = value.asDouble();
   if (std::isnan(number) || std::isinf(number)) {
-    throw std::runtime_error(
-        "Can't convert floating point to NBT representation: " + std::to_string(number));
+    throw std::runtime_error("Can't convert floating point to NBT representation: " + std::to_string(number));
   }
 
   if (const float f = static_cast<float>(number); static_cast<double>(f) == number) {
@@ -133,9 +132,8 @@ std::unique_ptr<tag::Tag> convert(Json::Value value) {
       }
 
       const auto first_type = items[0]->get_type();
-      const auto is_homogenous = std::ranges::all_of(items, [first_type](const std::unique_ptr<tag::Tag>& item) {
-        return item->get_type() == first_type;
-      });
+      const auto is_homogenous = std::ranges::all_of(
+          items, [first_type](const std::unique_ptr<tag::Tag>& item) { return item->get_type() == first_type; });
 
       if (!is_homogenous) {
         throw std::runtime_error("Cannot convert non-homogenous JSON Array to NBT");
@@ -164,9 +162,7 @@ std::unique_ptr<tag::Tag> convert(Json::Value value) {
 
       return builder->build_compound_ptr();
     }
-    [[unlikely]] default: {
-      throw std::runtime_error("Unknown JSON type cannot be converted to NBT");
-    }
+    [[unlikely]] default: { throw std::runtime_error("Unknown JSON type cannot be converted to NBT"); }
   }
 }
 
@@ -186,4 +182,4 @@ tag::TagCompound Json2NBTReader::convertToNbt(const icu::UnicodeString& name) co
 
   return builder->build_compound();
 }
-}
+}  // namespace celerity::nbt

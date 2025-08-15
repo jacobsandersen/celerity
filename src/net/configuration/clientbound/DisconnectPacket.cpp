@@ -14,14 +14,14 @@ ByteBuffer DisconnectPacket::encode() const {
   const nbt::NBTWriter writer(buf);
 
   auto component = nbt::TagCompoundBuilder::create()
-                             ->add("type", nbt::tag::TagString("text"))
-                             ->add("text", nbt::tag::TagString("Disconnected during configuration: "))
-                             ->add("extra", nbt::TagListBuilder<nbt::tag::TagString>::create(
-                                                nbt::tag::TagString(icu::UnicodeString(reason_.data())))
-                                                ->build_list())
-                             ->add("color", nbt::tag::TagString("red"))
-                             ->add("bold", nbt::tag::TagByte(1))
-                             ->build_compound_ptr();
+                       ->add("type", nbt::tag::TagString("text"))
+                       ->add("text", nbt::tag::TagString("Disconnected during configuration: "))
+                       ->add("extra", nbt::TagListBuilder<nbt::tag::TagString>::create(
+                                          nbt::tag::TagString(icu::UnicodeString(reason_.data())))
+                                          ->build_list())
+                       ->add("color", nbt::tag::TagString("red"))
+                       ->add("bold", nbt::tag::TagByte(1))
+                       ->build_compound_ptr();
 
   writer.write_tag(std::unique_ptr<nbt::tag::Tag>(std::move(component)));
   return buf;

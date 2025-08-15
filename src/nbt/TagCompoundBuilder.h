@@ -14,10 +14,8 @@
 
 namespace celerity::nbt {
 class TagCompoundBuilder : public std::enable_shared_from_this<TagCompoundBuilder> {
-public:
-  explicit TagCompoundBuilder(icu::UnicodeString name)
-    : m_name(std::move(name)), m_compound(tag::TagCompound()) {
-  }
+ public:
+  explicit TagCompoundBuilder(icu::UnicodeString name) : m_name(std::move(name)), m_compound(tag::TagCompound()) {}
 
   static std::shared_ptr<TagCompoundBuilder> create() {
     auto bogus = icu::UnicodeString();
@@ -46,22 +44,18 @@ public:
     return shared_from_this();
   }
 
-  tag::TagCompound build_compound() {
-    return std::move(m_compound);
-  }
+  tag::TagCompound build_compound() { return std::move(m_compound); }
 
   std::unique_ptr<tag::TagCompound> build_compound_ptr() {
     return std::make_unique<tag::TagCompound>(std::move(m_compound));
   }
 
-  tag::NamedTag build_named() {
-    return {m_name, std::move(build_compound_ptr())};
-  }
+  tag::NamedTag build_named() { return {m_name, std::move(build_compound_ptr())}; }
 
-private:
+ private:
   icu::UnicodeString m_name;
   tag::TagCompound m_compound;
 };
-} // namespace celerity::nbt
+}  // namespace celerity::nbt
 
 #endif
